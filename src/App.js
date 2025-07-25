@@ -1,24 +1,89 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Header from "./components/common/Header";
+import Footer from "./components/common/Footer";
+import PrivateRoute from "./components/common/PrivateRoute";
+import useAuth from "./hooks/useAuth";
+
+// Import Pages
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import RoadmapsListPage from "./pages/RoadmapsListPage"; // Import the new page
+import RoadmapPage from "./pages/user/RoadmapPage";
+import ProfilePage from "./pages/user/ProfilePage";
+
+// Role-specific pages
+import AdminDashboard from "./pages/admin/DashboardPage";
+import UserManagement from "./pages/admin/UserManagementPage";
+import EditorDashboard from "./pages/editor/ContentDashboardPage";
+import RoadmapEditor from "./pages/editor/RoadmapEditorPage";
+import LearnerDashboard from "./pages/user/LearnerDashboardPage";
 
 function App() {
+  const { user } = useAuth();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="d-flex flex-column" style={{ minHeight: "100vh" }}>
+        <Header />
+        <main className="flex-grow-1">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/roadmaps" element={<RoadmapsListPage />} />{" "}
+            {/* Add this route */}
+            <Route path="/roadmaps/:id" element={<RoadmapPage />} />
+            {/* Main dashboard route that redirects based on role */}
+            <Route
+              path="/dashboard"
+              element={
+                !user ? (
+                  <Navigate to="/login" />
+                ) : user.role === "Admin" ? (
+                  <Navigate to="/admin/dashboard" />
+                ) : user.role === "Editor" ? (
+                  <Navigate to="/editor/dashboard" />
+                ) : (
+                  <LearnerDashboard />
+                )
+              }
+            />
+            {/* User Routes */}
+            <Route
+              element={
+                <PrivateRoute allowedRoles={["User", "Admin", "Editor"]} />
+              }>
+              <Route path="/learner-dashboard" element={<LearnerDashboard />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+            {/* Admin Routes */}
+            <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<UserManagement />} />
+            </Route>
+            {/* Editor Routes */}
+            <Route
+              element={<PrivateRoute allowedRoles={["Editor", "Admin"]} />}>
+              <Route path="/editor/dashboard" element={<EditorDashboard />} />
+              <Route path="/editor/roadmaps/new" element={<RoadmapEditor />} />
+              <Route
+                path="/editor/roadmaps/edit/:id"
+                element={<RoadmapEditor />}
+              />
+            </Route>
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
