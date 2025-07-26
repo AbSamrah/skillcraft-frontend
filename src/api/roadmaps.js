@@ -11,13 +11,8 @@ export const getAllRoadmaps = async () => {
 };
 
 export const getRoadmapById = async (id) => {
-  try {
-    const response = await apiClient.get(`/Roadmaps/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Failed to fetch roadmap with id ${id}:`, error);
-    throw error.response?.data || { message: "An unknown error occurred" };
-  }
+  const response = await apiClient.get(`/roadmaps/${id}`);
+  return response.data;
 };
 
 export const createRoadmap = async (roadmapData) => {

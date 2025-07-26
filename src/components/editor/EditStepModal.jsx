@@ -6,6 +6,7 @@ const EditStepModal = ({ show, handleClose, step, onStepUpdated }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState({ days: 0, hours: 0, minutes: 0 });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (step) {
@@ -34,16 +35,23 @@ const EditStepModal = ({ show, handleClose, step, onStepUpdated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
+    const totalMinutes =
+      duration.days * 8 * 60 + duration.hours * 60 + duration.minutes;
+
+    if (totalMinutes <= 0) {
+      setError("Duration must be greater than zero.");
+      return;
+    }
+
     try {
-      // Reconstruct total minutes before sending to the backend
-      const totalMinutes =
-        duration.days * 8 * 60 + duration.hours * 60 + duration.minutes;
       const payload = { name, description, durationInMinutes: totalMinutes };
       const updatedStep = await updateStep(step.id, payload);
       onStepUpdated(updatedStep);
       handleClose();
     } catch (error) {
       console.error("Failed to update step:", error);
+      setError("Failed to update step. Please try again.");
     }
   };
 
@@ -65,6 +73,7 @@ const EditStepModal = ({ show, handleClose, step, onStepUpdated }) => {
           </div>
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
+              {error && <div className="alert alert-danger">{error}</div>}
               <div className="mb-3">
                 <label>Step Name</label>
                 <input

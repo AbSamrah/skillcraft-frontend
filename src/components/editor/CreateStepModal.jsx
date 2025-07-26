@@ -6,6 +6,7 @@ const CreateStepModal = ({ show, handleClose, onStepCreated }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState({ days: 0, hours: 0, minutes: 0 });
+  const [error, setError] = useState("");
 
   const handleDurationChange = (e) => {
     const { name, value } = e.target;
@@ -14,11 +15,16 @@ const CreateStepModal = ({ show, handleClose, onStepCreated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // Assuming an 8-hour work day
-      const totalMinutes =
-        duration.days * 8 * 60 + duration.hours * 60 + duration.minutes;
+    setError("");
+    const totalMinutes =
+      duration.days * 8 * 60 + duration.hours * 60 + duration.minutes;
 
+    if (totalMinutes <= 0) {
+      setError("Duration must be greater than zero.");
+      return;
+    }
+
+    try {
       const payload = {
         name,
         description,
@@ -34,6 +40,7 @@ const CreateStepModal = ({ show, handleClose, onStepCreated }) => {
       handleClose();
     } catch (error) {
       console.error("Failed to create step:", error);
+      setError("Failed to create step. Please try again.");
     }
   };
 
@@ -55,6 +62,7 @@ const CreateStepModal = ({ show, handleClose, onStepCreated }) => {
           </div>
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
+              {error && <div className="alert alert-danger">{error}</div>}
               <div className="mb-3">
                 <label htmlFor="stepName" className="form-label">
                   Step Name

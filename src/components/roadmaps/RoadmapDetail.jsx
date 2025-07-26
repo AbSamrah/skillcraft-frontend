@@ -77,21 +77,33 @@ const RoadmapDetail = () => {
 
   return (
     <div className="container py-5">
-      <div className="text-center mb-5">
-        <h1>{roadmap.name}</h1>
-        <p className="lead text-muted">{roadmap.description}</p>
-        <div>
+      <div className="roadmap-details-card mb-5">
+        <h1 className="roadmap-title">{roadmap.name}</h1>
+        <p className="roadmap-description">{roadmap.description}</p>
+        <div className="tags-container mb-3">
           {roadmap.tags?.map((tag) => (
             <span key={tag} className="badge bg-primary me-1 fs-6">
               {tag}
             </span>
           ))}
+        </div>
+        <hr />
+        <div className="metrics-container">
           {totalDuration && (
-            <span className="badge bg-info mx-1 fs-6">{totalDuration}</span>
+            <div className="metric-item">
+              <span className="metric-label">Total Duration</span>
+              <span className="metric-value duration-metric">
+                {totalDuration}
+              </span>
+            </div>
           )}
-          {/* Display Average Salary */}
           {averageSalary && (
-            <span className="badge bg-success mx-1 fs-6">{averageSalary}</span>
+            <div className="metric-item">
+              <span className="metric-label">Average Salary</span>
+              <span className="metric-value salary-metric">
+                {averageSalary}
+              </span>
+            </div>
           )}
         </div>
       </div>

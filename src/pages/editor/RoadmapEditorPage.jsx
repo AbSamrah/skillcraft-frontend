@@ -31,6 +31,7 @@ const RoadmapEditorPage = () => {
   const [editingMilestone, setEditingMilestone] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [formErrors, setFormErrors] = useState({});
 
   const fetchAllMilestones = useCallback(async () => {
     try {
@@ -129,8 +130,22 @@ const RoadmapEditorPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validate = () => {
+    const errors = {};
+    if (formData.salary <= 0) {
+      errors.salary = "Salary must be greater than zero.";
+    }
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
     setError("");
     const payload = {
       ...formData,
@@ -212,14 +227,15 @@ const RoadmapEditorPage = () => {
               </div>
             </div>
 
-            {/* ADDED SALARY INPUT */}
             <div className="mb-3">
               <label htmlFor="salary" className="form-label">
                 Average Annual Salary (USD)
               </label>
               <input
                 type="number"
-                className="form-control"
+                className={`form-control ${
+                  formErrors.salary ? "is-invalid" : ""
+                }`}
                 id="salary"
                 name="salary"
                 value={formData.salary}

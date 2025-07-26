@@ -104,3 +104,53 @@
     left: 0%;
   }
 }
+
+.roadmap-details-card {
+  background-color: #f8f9fa; /* A light background color */
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  text-align: left; /* Align text to the left */
+}
+
+.roadmap-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.roadmap-description {
+  font-size: 1.1rem;
+  color: #6c757d; /* Muted text color */
+  margin-bottom: 1.5rem;
+}
+
+.metrics-container {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.duration-metric {
+  color: #0d6efd; /* Blue */
+}
+
+.salary-metric {
+  color: #198754; /* Green */
+}
