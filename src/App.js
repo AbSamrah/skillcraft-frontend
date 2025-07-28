@@ -12,10 +12,11 @@ import useAuth from "./hooks/useAuth";
 
 // Import Pages
 import QuizzesPage from "./pages/QuizzesPage";
+import TakeQuizPage from "./pages/user/TakeQuizPage"; // Import the new page
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import RoadmapsListPage from "./pages/RoadmapsListPage"; // Import the new page
+import RoadmapsListPage from "./pages/RoadmapsListPage";
 import RoadmapPage from "./pages/user/RoadmapPage";
 import ProfilePage from "./pages/user/ProfilePage";
 
@@ -39,10 +40,20 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/roadmaps" element={<RoadmapsListPage />} />{" "}
-            {/* Add this route */}
+            <Route path="/roadmaps" element={<RoadmapsListPage />} />
             <Route path="/roadmaps/:id" element={<RoadmapPage />} />
             <Route path="/quizzes" element={<QuizzesPage />} />
+
+            {/* Add the new route for taking a specific quiz */}
+            <Route
+              path="/quizzes/:id"
+              element={
+                <PrivateRoute>
+                  <TakeQuizPage />
+                </PrivateRoute>
+              }
+            />
+
             {/* Main dashboard route that redirects based on role */}
             <Route
               path="/dashboard"

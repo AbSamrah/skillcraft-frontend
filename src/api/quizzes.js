@@ -53,19 +53,10 @@ export const deleteQuiz = async (id) => {
 
 /**
  * Submits an answer for a quiz and checks if it's correct.
- * @param {string} id - The ID of the quiz.
- * @param {string} answer - The user's selected answer.
- * @returns {Promise<boolean>} A promise that resolves to true if the answer is correct, otherwise false.
  */
 export const checkAnswer = async (id, answer) => {
-  const response = await apiClient.put(
-    `/answer/${id}`,
-    JSON.stringify(answer),
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-  return response.data;
+  const response = await apiClient.get(`/MultipleChoicesQuiz/answer/${id}`, {
+    params: { answer },
+  });
+  return response.data; // This will be true or false
 };

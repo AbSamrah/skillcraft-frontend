@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
         return null;
       }
       return {
+        id: decoded.id, // Extract the user ID
         firstName: decoded.given_name,
         lastName: decoded.family_name,
         email: decoded.email,
@@ -39,10 +40,6 @@ export const AuthProvider = ({ children }) => {
   const login = (token) => {
     localStorage.setItem("authToken", token);
     const userData = decodeToken(token);
-
-    // ADD THIS LINE TO LOG USER INFO
-    console.log("User Logged In:", userData);
-
     setUser(userData);
   };
 

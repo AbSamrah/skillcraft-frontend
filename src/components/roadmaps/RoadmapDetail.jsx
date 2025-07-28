@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { getRoadmapById } from "../../api/roadmaps";
+import {
+  addRoadmapToProfile,
+  removeRoadmapFromProfile,
+  getFinishedSteps,
+  finishSteps,
+  unfinishSteps,
+  checkRoadmapInProfile,
+} from "../../api/profile"; // Using your specified file name
+import useAuth from "../../hooks/useAuth";
+import Button from "../ui/Button";
 import "../../assets/styles/RoadmapDetail.css";
 
 const formatDuration = (totalMinutes) => {
-  if (!totalMinutes || totalMinutes <= 0) return "";
+  if (!totalMinutes || totalMinutes <= 0) return "0m";
   const minutesInHour = 60;
   const hoursInDay = 8;
   const daysInWeek = 5;
@@ -44,117 +54,205 @@ const formatDuration = (totalMinutes) => {
   }`.trim();
 };
 
-// Helper function to format salary
 const formatSalary = (salary) => {
   if (!salary || salary <= 0) return "";
   return `$${salary.toLocaleString("en-US")}/yr`;
 };
 
 const RoadmapDetail = () => {
-  const { id } = useParams();
+  const { id: roadmapId } = useParams();
+  const { user } = useAuth();
+
   const [roadmap, setRoadmap] = useState(null);
+  const [isInProfile, setIsInProfile] = useState(false);
+  const [finishedSteps, setFinishedSteps] = useState(new Set());
+  const [selectedSteps, setSelectedSteps] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchRoadmap = async () => {
-      try {
-        const data = await getRoadmapById(id);
-        setRoadmap(data);
-      } catch (error) {
-        console.error("Failed to fetch roadmap details:", error);
-      } finally {
-        setLoading(false);
+  const fetchAllData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const roadmapData = await getRoadmapById(roadmapId);
+      setRoadmap(roadmapData);
+
+      if (user) {
+        const [inProfile, finishedStepsData] = await Promise.all([
+          checkRoadmapInProfile(user.id, roadmapId),
+          getFinishedSteps(user.id, roadmapId),
+        ]);
+
+        setIsInProfile(inProfile);
+        const finishedSet = new Set(finishedStepsData);
+        setFinishedSteps(finishedSet);
+        setSelectedSteps(new Set(finishedSet));
       }
-    };
-    fetchRoadmap();
-  }, [id]);
+    } catch (error) {
+      console.error("Failed to fetch roadmap data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [roadmapId, user]);
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
+
+  const handleProfileToggle = async () => {
+    if (!user) return;
+    const action = isInProfile ? removeRoadmapFromProfile : addRoadmapToProfile;
+    try {
+      await action(user.id, roadmapId);
+      setIsInProfile(!isInProfile);
+      alert(
+        `Roadmap ${isInProfile ? "removed from" : "added to"} your profile!`
+      );
+    } catch (error) {
+      console.error("Failed to toggle roadmap in profile:", error);
+    }
+  };
+
+  const handleStepSelectionChange = (stepId) => {
+    const newSelection = new Set(selectedSteps);
+    if (newSelection.has(stepId)) {
+      newSelection.delete(stepId);
+    } else {
+      newSelection.add(stepId);
+    }
+    setSelectedSteps(newSelection);
+  };
+
+  const handleUpdateFinishedSteps = async () => {
+    if (!user) return;
+    const stepsToFinish = [...selectedSteps].filter(
+      (x) => !finishedSteps.has(x)
+    );
+    const stepsToUnfinish = [...finishedSteps].filter(
+      (x) => !selectedSteps.has(x)
+    );
+
+    try {
+      await Promise.all([
+        stepsToFinish.length > 0 && finishSteps(user.id, stepsToFinish),
+        stepsToUnfinish.length > 0 && unfinishSteps(user.id, stepsToUnfinish),
+      ]);
+      setFinishedSteps(selectedSteps);
+      alert("Your progress has been updated!");
+    } catch (error) {
+      console.error("Failed to update progress:", error);
+      alert("There was an error updating your progress.");
+    }
+  };
 
   if (loading) return <p className="text-center mt-5">Loading Roadmap...</p>;
   if (!roadmap) return <p className="text-center mt-5">Roadmap not found.</p>;
 
-  const totalDuration = formatDuration(roadmap.durationInMinutes);
-  const averageSalary = formatSalary(roadmap.salary);
+  const allSteps = roadmap.milestones?.flatMap((m) => m.steps) || [];
+  const totalDuration = allSteps.reduce(
+    (acc, step) => acc + step.durationInMinutes,
+    0
+  );
+  const completedDuration = allSteps
+    .filter((step) => selectedSteps.has(step.id))
+    .reduce((acc, step) => acc + step.durationInMinutes, 0);
+  const remainingDuration = totalDuration - completedDuration;
+  const progressPercentage =
+    totalDuration > 0 ? (completedDuration / totalDuration) * 100 : 0;
 
   return (
     <div className="container py-5">
-      <div className="roadmap-details-card mb-5">
+      <div className="roadmap-details-card mb-4">
         <h1 className="roadmap-title">{roadmap.name}</h1>
         <p className="roadmap-description">{roadmap.description}</p>
-        <div className="tags-container mb-3">
-          {roadmap.tags?.map((tag) => (
-            <span key={tag} className="badge bg-primary me-1 fs-6">
-              {tag}
-            </span>
-          ))}
-        </div>
-        <hr />
         <div className="metrics-container">
-          {totalDuration && (
-            <div className="metric-item">
-              <span className="metric-label">Total Duration</span>
-              <span className="metric-value duration-metric">
-                {totalDuration}
-              </span>
-            </div>
-          )}
-          {averageSalary && (
-            <div className="metric-item">
-              <span className="metric-label">Average Salary</span>
-              <span className="metric-value salary-metric">
-                {averageSalary}
-              </span>
-            </div>
-          )}
+          <div className="metric-item">
+            <span className="metric-label">Total Duration</span>
+            <span className="metric-value duration-metric">
+              {formatDuration(totalDuration)}
+            </span>
+          </div>
+          <div className="metric-item">
+            <span className="metric-label">Average Salary</span>
+            <span className="metric-value salary-metric">
+              {formatSalary(roadmap.salary)}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="timeline">
-        {roadmap.milestones?.map((milestone, index) => {
-          const milestoneDuration = formatDuration(milestone.durationInMinutes);
-          return (
-            <div
-              key={milestone.id}
-              className={`timeline-container ${
-                index % 2 === 0 ? "left" : "right"
-              }`}>
-              <div className="timeline-content">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h2>{milestone.name}</h2>
-                  {milestoneDuration && (
-                    <span className="badge bg-secondary">
-                      {milestoneDuration}
-                    </span>
-                  )}
-                </div>
-                <p>{milestone.description}</p>
-                <hr />
-                <ul className="list-group list-group-flush">
-                  {milestone.steps?.map((step) => (
-                    <li
-                      key={step.id}
-                      className="list-group-item bg-transparent border-0 ps-0 d-flex justify-content-between align-items-center">
-                      <div>
-                        <input
-                          className="form-check-input me-2"
-                          type="checkbox"
-                          id={`step-${step.id}`}
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor={`step-${step.id}`}>
-                          {step.name}
-                        </label>
-                      </div>
-                      <small className="text-muted">
-                        {formatDuration(step.durationInMinutes)}
-                      </small>
-                    </li>
-                  ))}
-                </ul>
+      {user && (
+        <div className="card mb-4">
+          <div className="card-body">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <Button
+                onClick={handleProfileToggle}
+                variant={isInProfile ? "danger" : "success"}>
+                {isInProfile ? "Remove from My Profile" : "Add to My Profile"}
+              </Button>
+              <Button onClick={handleUpdateFinishedSteps}>
+                Update My Progress
+              </Button>
+            </div>
+            <div className="progress mb-3" style={{ height: "25px" }}>
+              <div
+                className="progress-bar"
+                style={{ width: `${progressPercentage}%` }}>
+                {Math.round(progressPercentage)}%
               </div>
             </div>
-          );
-        })}
+            <div className="d-flex justify-content-between text-center">
+              <div>
+                <strong>Total Time:</strong> {formatDuration(totalDuration)}
+              </div>
+              <div>
+                <strong>Completed:</strong> {formatDuration(completedDuration)}
+              </div>
+              <div>
+                <strong>Remaining:</strong> {formatDuration(remainingDuration)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="timeline">
+        {roadmap.milestones?.map((milestone, index) => (
+          <div
+            key={milestone.id}
+            className={`timeline-container ${
+              index % 2 === 0 ? "left" : "right"
+            }`}>
+            <div className="timeline-content">
+              <h2>{milestone.name}</h2>
+              <p>{milestone.description}</p>
+              <ul className="list-group list-group-flush">
+                {milestone.steps?.map((step) => (
+                  <li
+                    key={step.id}
+                    className="list-group-item bg-transparent border-0 ps-0 d-flex justify-content-between align-items-center">
+                    <div>
+                      <input
+                        className="form-check-input me-2"
+                        type="checkbox"
+                        id={`step-${step.id}`}
+                        checked={selectedSteps.has(step.id)}
+                        onChange={() => handleStepSelectionChange(step.id)}
+                        disabled={!user}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`step-${step.id}`}>
+                        {step.name}
+                      </label>
+                    </div>
+                    <small className="text-muted">
+                      {formatDuration(step.durationInMinutes)}
+                    </small>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
