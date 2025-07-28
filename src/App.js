@@ -11,6 +11,7 @@ import PrivateRoute from "./components/common/PrivateRoute";
 import useAuth from "./hooks/useAuth";
 
 // Import Pages
+import QuizzesPage from "./pages/QuizzesPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
@@ -41,6 +42,7 @@ function App() {
             <Route path="/roadmaps" element={<RoadmapsListPage />} />{" "}
             {/* Add this route */}
             <Route path="/roadmaps/:id" element={<RoadmapPage />} />
+            <Route path="/quizzes" element={<QuizzesPage />} />
             {/* Main dashboard route that redirects based on role */}
             <Route
               path="/dashboard"

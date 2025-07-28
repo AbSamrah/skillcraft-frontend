@@ -5,10 +5,10 @@ import useAuth from "../../hooks/useAuth";
 const PrivateRoute = ({ allowedRoles }) => {
   const { user, loading } = useAuth();
 
-  // If the authentication state is still loading, don't render anything yet.
+  // If the authentication state is still loading
   // This prevents a flicker on page refresh.
   if (loading) {
-    return null; // Or you could return a loading spinner component
+    return null;
   }
 
   // If the user is not authenticated, redirect them to the login page.
