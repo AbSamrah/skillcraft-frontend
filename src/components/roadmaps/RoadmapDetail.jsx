@@ -8,7 +8,7 @@ import {
   finishSteps,
   unfinishSteps,
   checkRoadmapInProfile,
-} from "../../api/profile"; // Using your specified file name
+} from "../../api/profile";
 import useAuth from "../../hooks/useAuth";
 import Button from "../ui/Button";
 import "../../assets/styles/RoadmapDetail.css";
@@ -75,7 +75,7 @@ const RoadmapDetail = () => {
       const roadmapData = await getRoadmapById(roadmapId);
       setRoadmap(roadmapData);
 
-      if (user) {
+      if (user && user.role === "User") {
         const [inProfile, finishedStepsData] = await Promise.all([
           checkRoadmapInProfile(user.id, roadmapId),
           getFinishedSteps(user.id, roadmapId),
@@ -179,7 +179,8 @@ const RoadmapDetail = () => {
         </div>
       </div>
 
-      {user && (
+      {/* FIX: Conditionally render this entire block for 'User' role only */}
+      {user && user.role === "User" && (
         <div className="card mb-4">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -236,7 +237,8 @@ const RoadmapDetail = () => {
                         id={`step-${step.id}`}
                         checked={selectedSteps.has(step.id)}
                         onChange={() => handleStepSelectionChange(step.id)}
-                        disabled={!user}
+                        // FIX: Disable checkboxes for non-User roles
+                        disabled={!user || user.role !== "User"}
                       />
                       <label
                         className="form-check-label"

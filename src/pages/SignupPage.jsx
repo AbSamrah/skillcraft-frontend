@@ -28,7 +28,7 @@ const SignupPage = () => {
       const token = await apiSignup(formData);
       // If signup is successful, log the user in with the received token
       login(token);
-      // Redirect to the user's dashboard
+      // Redirect to the home
       navigate("/dashboard");
     } catch (err) {
       console.error("Signup failed:", err);

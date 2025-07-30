@@ -1,8 +1,8 @@
 import apiClient from "./apiClient";
 
-export const getAllRoadmaps = async () => {
+export const getAllRoadmaps = async (filter = {}) => {
   try {
-    const response = await apiClient.get("/Roadmaps");
+    const response = await apiClient.get("/Roadmaps", { params: filter });
     return response.data;
   } catch (error) {
     console.error("Failed to fetch roadmaps:", error);
@@ -17,7 +17,8 @@ export const getRoadmapById = async (id) => {
 
 export const createRoadmap = async (roadmapData) => {
   try {
-    const response = await apiClient.post("/Roadmaps", roadmapData);
+    const response = await apiClient.post("/Roadmaps/manual", roadmapData);
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error("Failed to create roadmap:", error);
@@ -25,7 +26,6 @@ export const createRoadmap = async (roadmapData) => {
   }
 };
 
-// ADD THIS FUNCTION
 export const updateRoadmap = async (id, roadmapData) => {
   try {
     const response = await apiClient.put(`/Roadmaps/${id}`, roadmapData);
@@ -43,6 +43,18 @@ export const deleteRoadmap = async (id) => {
     return response.data;
   } catch (error) {
     console.error("Failed to delete roadmap:", error);
+    throw error.response?.data || { message: "An unknown error occurred" };
+  }
+};
+
+export const generateRoadmapWithAi = async (topic) => {
+  try {
+    const response = await apiClient.post("/Roadmaps/ai", {
+      prompt: topic,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to generate AI roadmap:", error.response.data);
     throw error.response?.data || { message: "An unknown error occurred" };
   }
 };

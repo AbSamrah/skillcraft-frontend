@@ -6,13 +6,11 @@ import { getAllMilestones, deleteMilestone } from "../../api/milestones";
 import { getAllSteps, deleteStep } from "../../api/steps";
 import { getAllQuizzes, deleteQuiz } from "../../api/quizzes";
 
-// Modals for Milestones and Steps
 import CreateStepModal from "../../components/editor/CreateStepModal";
 import EditStepModal from "../../components/editor/EditStepModal";
 import CreateMilestoneModal from "../../components/editor/CreateMilestoneModal";
 import EditMilestoneModal from "../../components/editor/EditMilestoneModal";
-
-// **FIX:** Import the quiz modals from their new dedicated file.
+import useDebounce from "../../hooks/useDebounce";
 import {
   CreateQuizModal,
   EditQuizModal,
@@ -20,13 +18,30 @@ import {
 
 const ContentDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("roadmaps");
-  const [roadmaps, setRoadmaps] = useState([]);
-  const [milestones, setMilestones] = useState([]);
-  const [steps, setSteps] = useState([]);
-  const [quizzes, setQuizzes] = useState([]);
+  const [data, setData] = useState({
+    roadmaps: [],
+    milestones: [],
+    steps: [],
+    quizzes: [],
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const [filters, setFilters] = useState({
+    roadmaps: { name: "", pageNumber: 0, pageSize: 10 },
+    milestones: { name: "", pageNumber: 0, pageSize: 10 },
+    steps: { name: "", pageNumber: 0, pageSize: 10 },
+  });
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const [isLastPage, setIsLastPage] = useState({
+    roadmaps: false,
+    milestones: false,
+    steps: false,
+  });
 
   // State for modals
   const [showCreateStep, setShowCreateStep] = useState(false);
@@ -35,8 +50,6 @@ const ContentDashboardPage = () => {
   const [showCreateMilestone, setShowCreateMilestone] = useState(false);
   const [showEditMilestone, setShowEditMilestone] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState(null);
-
-  // State for Quiz modals
   const [showCreateQuiz, setShowCreateQuiz] = useState(false);
   const [showEditQuiz, setShowEditQuiz] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState(null);
@@ -47,26 +60,59 @@ const ContentDashboardPage = () => {
     try {
       const [roadmapsRes, milestonesRes, stepsRes, quizzesRes] =
         await Promise.all([
-          getAllRoadmaps(),
-          getAllMilestones(),
-          getAllSteps(),
+          getAllRoadmaps(filters.roadmaps),
+          getAllMilestones(filters.milestones),
+          getAllSteps(filters.steps),
           getAllQuizzes(),
         ]);
-      setRoadmaps(roadmapsRes);
-      setMilestones(milestonesRes);
-      setSteps(stepsRes);
-      setQuizzes(quizzesRes);
+
+      setData({
+        roadmaps: roadmapsRes,
+        milestones: milestonesRes,
+        steps: stepsRes,
+        quizzes: quizzesRes,
+      });
+
+      setIsLastPage({
+        roadmaps: roadmapsRes.length < filters.roadmaps.pageSize,
+        milestones: milestonesRes.length < filters.milestones.pageSize,
+        steps: stepsRes.length < filters.steps.pageSize,
+      });
     } catch (error) {
       setError("Failed to fetch content. Please try again.");
-      console.error("Failed to fetch content:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      [activeTab]: {
+        ...prev[activeTab],
+        name: debouncedSearchTerm,
+        pageNumber: 0,
+      },
+    }));
+  }, [debouncedSearchTerm, activeTab]);
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handlePageChange = (direction) => {
+    setFilters((prev) => ({
+      ...prev,
+      [activeTab]: {
+        ...prev[activeTab],
+        pageNumber: Math.max(0, prev[activeTab].pageNumber + direction),
+      },
+    }));
+  };
 
   const handleDelete = async (type, id) => {
     if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
@@ -98,12 +144,10 @@ const ContentDashboardPage = () => {
     if (type === "milestone") {
       setEditingMilestone(item);
       setShowEditMilestone(true);
-    }
-    if (type === "step") {
+    } else if (type === "step") {
       setEditingStep(item);
       setShowEditStep(true);
-    }
-    if (type === "quiz") {
+    } else if (type === "quiz") {
       setEditingQuiz(item);
       setShowEditQuiz(true);
     }
@@ -119,31 +163,58 @@ const ContentDashboardPage = () => {
         );
       case "milestones":
         return (
-          <Button
-            onClick={() => setShowCreateMilestone(true)}
-            className="btn btn-primary">
+          <Button onClick={() => setShowCreateMilestone(true)}>
             Create New Milestone
           </Button>
         );
       case "steps":
         return (
-          <Button
-            onClick={() => setShowCreateStep(true)}
-            className="btn btn-primary">
+          <Button onClick={() => setShowCreateStep(true)}>
             Create New Step
           </Button>
         );
       case "quizzes":
         return (
-          <Button
-            onClick={() => setShowCreateQuiz(true)}
-            className="btn btn-primary">
+          <Button onClick={() => setShowCreateQuiz(true)}>
             Create New Quiz
           </Button>
         );
       default:
         return null;
     }
+  };
+
+  const renderSearchAndPagination = () => {
+    if (!["roadmaps", "milestones", "steps"].includes(activeTab)) return null;
+
+    return (
+      <div className="mb-4">
+        <div className="input-group mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder={`Search ${activeTab} by name...`}
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
+        <div className="d-flex justify-content-center align-items-center">
+          <Button
+            onClick={() => handlePageChange(-1)}
+            disabled={filters[activeTab].pageNumber === 0 || loading}
+            className="me-2">
+            &larr; Previous
+          </Button>
+          <span className="mx-2">Page {filters[activeTab].pageNumber + 1}</span>
+          <Button
+            onClick={() => handlePageChange(1)}
+            disabled={isLastPage[activeTab] || loading}
+            className="ms-2">
+            Next &rarr;
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   const renderRoadmaps = () => (
@@ -158,7 +229,7 @@ const ContentDashboardPage = () => {
           </tr>
         </thead>
         <tbody>
-          {roadmaps.map((item) => (
+          {data.roadmaps.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
               <td>{item.description}</td>
@@ -193,7 +264,7 @@ const ContentDashboardPage = () => {
           </tr>
         </thead>
         <tbody>
-          {milestones.map((item) => (
+          {data.milestones.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
               <td>{item.description}</td>
@@ -227,7 +298,7 @@ const ContentDashboardPage = () => {
           </tr>
         </thead>
         <tbody>
-          {steps.map((item) => (
+          {data.steps.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
               <td>{item.description}</td>
@@ -261,7 +332,7 @@ const ContentDashboardPage = () => {
           </tr>
         </thead>
         <tbody>
-          {quizzes.map((quiz) => (
+          {data.quizzes.map((quiz) => (
             <tr key={quiz.id}>
               <td>{quiz.question}</td>
               <td>{quiz.tag}</td>
@@ -328,6 +399,7 @@ const ContentDashboardPage = () => {
           <p>Loading...</p>
         ) : (
           <div className="card p-3">
+            {renderSearchAndPagination()}
             {activeTab === "roadmaps" && renderRoadmaps()}
             {activeTab === "milestones" && renderMilestones()}
             {activeTab === "steps" && renderSteps()}
@@ -336,7 +408,6 @@ const ContentDashboardPage = () => {
         )}
       </div>
 
-      {/* Modals for all content types */}
       <CreateStepModal
         show={showCreateStep}
         handleClose={() => setShowCreateStep(false)}
@@ -348,7 +419,6 @@ const ContentDashboardPage = () => {
         step={editingStep}
         onStepUpdated={fetchData}
       />
-
       <CreateMilestoneModal
         show={showCreateMilestone}
         handleClose={() => setShowCreateMilestone(false)}
@@ -360,7 +430,6 @@ const ContentDashboardPage = () => {
         milestone={editingMilestone}
         onMilestoneUpdated={fetchData}
       />
-
       <CreateQuizModal
         show={showCreateQuiz}
         handleClose={() => setShowCreateQuiz(false)}

@@ -1,0 +1,111 @@
+/* AI Generator Styling */
+.ai-generator-container {
+  background: linear-gradient(135deg, #f0f2f5, #e6e9ee);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  position: relative; /* Crucial for overlay positioning */
+  overflow: hidden; /* Ensures the overlay corners are rounded */
+}
+
+.ai-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.ai-input-field {
+  flex-grow: 1;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.ai-input-field:focus {
+  background: white;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+  outline: none;
+}
+
+.ai-generate-btn {
+  background: linear-gradient(90deg, #0d6efd, #0d6efd);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px 0 rgba(13, 110, 253, 0.5);
+}
+
+.ai-generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(13, 110, 253, 0.6);
+}
+
+.ai-generate-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- NEW: Generating Effects --- */
+.generating-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  flex-direction: column;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.typing-effect {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #364fc7;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 0.15em solid #364fc7;
+  animation: typing 2s steps(30, end) infinite,
+    blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #364fc7;
+  }
+}

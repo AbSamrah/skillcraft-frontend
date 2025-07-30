@@ -1,28 +1,36 @@
 import axios from "axios";
 
-// The base URL for your backend API
 const API_URL = "http://localhost:5093/api";
 
 const apiClient = axios.create({
   baseURL: API_URL,
 });
 
-// Response Interceptor
+// FIX: Add a request interceptor to attach the auth token to every request
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// This response interceptor is correct and handles logging out on 401 errors.
 apiClient.interceptors.response.use(
   (response) => {
-    // If the request was successful, just return the response
     return response;
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // User is not authenticated
-      // You can clear local storage and redirect to the login page
       console.log("Unauthorized, logging out...");
-      localStorage.removeItem("token"); // or wherever you store it
-      window.location.href = "/login"; // Force a full page refresh to clear state
+      localStorage.removeItem("authToken");
+      window.location.href = "/login";
     }
-
-    // Pass the error along to the calling code
     return Promise.reject(error);
   }
 );

@@ -15,9 +15,10 @@ const Header = () => {
     if (!user) return null;
     if (user.role === "Admin") return "/admin/dashboard";
     if (user.role === "Editor") return "/editor/dashboard";
-    // This can be updated if regular users get a dashboard
-    return "/";
+    return null;
   };
+
+  const dashboardLink = getDashboardLink();
 
   return (
     <header className="bg-light shadow-sm">
@@ -63,16 +64,22 @@ const Header = () => {
                   <ul
                     className="dropdown-menu dropdown-menu-end"
                     aria-labelledby="userMenuButton">
-                    <li>
-                      <Link className="dropdown-item" to={getDashboardLink()}>
-                        My Dashboard
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item" to="/profile">
-                        My Profile
-                      </Link>
-                    </li>
+                    {/* FIX: Conditionally render dashboard link */}
+                    {dashboardLink && (
+                      <li>
+                        <Link className="dropdown-item" to={dashboardLink}>
+                          My Dashboard
+                        </Link>
+                      </li>
+                    )}
+                    {/* FIX: Conditionally render profile link */}
+                    {user.role === "User" && (
+                      <li>
+                        <Link className="dropdown-item" to="/profile">
+                          My Profile
+                        </Link>
+                      </li>
+                    )}
                     <li>
                       <hr className="dropdown-divider" />
                     </li>

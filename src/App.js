@@ -12,24 +12,36 @@ import useAuth from "./hooks/useAuth";
 
 // Import Pages
 import QuizzesPage from "./pages/QuizzesPage";
-import TakeQuizPage from "./pages/user/TakeQuizPage"; // Import the new page
+import TakeQuizPage from "./pages/user/TakeQuizPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import RoadmapsListPage from "./pages/RoadmapsListPage";
 import RoadmapPage from "./pages/user/RoadmapPage";
 import ProfilePage from "./pages/user/ProfilePage";
-
-// Role-specific pages
 import AdminDashboard from "./pages/admin/DashboardPage";
 import UserManagement from "./pages/admin/UserManagementPage";
 import EditorDashboard from "./pages/editor/ContentDashboardPage";
 import RoadmapEditor from "./pages/editor/RoadmapEditorPage";
-import LearnerDashboard from "./pages/user/LearnerDashboardPage";
+// A new component to handle the main dashboard redirection logic
+const DashboardRedirect = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) return null; // Or a loading spinner
+
+  if (!user) return <Navigate to="/login" replace />;
+
+  switch (user.role) {
+    case "Admin":
+      return <Navigate to="/admin/dashboard" replace />;
+    case "Editor":
+      return <Navigate to="/editor/dashboard" replace />;
+    default:
+      return <Navigate to="/" replace />;
+  }
+};
 
 function App() {
-  const { user } = useAuth();
-
   return (
     <Router>
       <div className="d-flex flex-column" style={{ minHeight: "100vh" }}>
@@ -44,7 +56,10 @@ function App() {
             <Route path="/roadmaps/:id" element={<RoadmapPage />} />
             <Route path="/quizzes" element={<QuizzesPage />} />
 
-            {/* Add the new route for taking a specific quiz */}
+            {/* Main dashboard redirect */}
+            <Route path="/dashboard" element={<DashboardRedirect />} />
+
+            {/* Protected Routes */}
             <Route
               path="/quizzes/:id"
               element={
@@ -54,44 +69,54 @@ function App() {
               }
             />
 
-            {/* Main dashboard route that redirects based on role */}
             <Route
-              path="/dashboard"
+              path="/profile"
               element={
-                !user ? (
-                  <Navigate to="/login" />
-                ) : user.role === "Admin" ? (
-                  <Navigate to="/admin/dashboard" />
-                ) : user.role === "Editor" ? (
-                  <Navigate to="/editor/dashboard" />
-                ) : (
-                  <LearnerDashboard />
-                )
+                <PrivateRoute allowedRoles={["User", "Admin", "Editor"]}>
+                  <ProfilePage />
+                </PrivateRoute>
               }
             />
-            {/* User Routes */}
             <Route
+              path="/admin/dashboard"
               element={
-                <PrivateRoute allowedRoles={["User", "Admin", "Editor"]} />
-              }>
-              <Route path="/learner-dashboard" element={<LearnerDashboard />} />
-              <Route path="/profile" element={<ProfilePage />} />
-            </Route>
-            {/* Admin Routes */}
-            <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<UserManagement />} />
-            </Route>
-            {/* Editor Routes */}
+                <PrivateRoute allowedRoles={["Admin"]}>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
             <Route
-              element={<PrivateRoute allowedRoles={["Editor", "Admin"]} />}>
-              <Route path="/editor/dashboard" element={<EditorDashboard />} />
-              <Route path="/editor/roadmaps/new" element={<RoadmapEditor />} />
-              <Route
-                path="/editor/roadmaps/edit/:id"
-                element={<RoadmapEditor />}
-              />
-            </Route>
+              path="/admin/users"
+              element={
+                <PrivateRoute allowedRoles={["Admin"]}>
+                  <UserManagement />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/editor/dashboard"
+              element={
+                <PrivateRoute allowedRoles={["Editor", "Admin"]}>
+                  <EditorDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/editor/roadmaps/new"
+              element={
+                <PrivateRoute allowedRoles={["Editor", "Admin"]}>
+                  <RoadmapEditor />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/editor/roadmaps/edit/:id"
+              element={
+                <PrivateRoute allowedRoles={["Editor", "Admin"]}>
+                  <RoadmapEditor />
+                </PrivateRoute>
+              }
+            />
           </Routes>
         </main>
         <Footer />

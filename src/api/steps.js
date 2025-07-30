@@ -1,8 +1,8 @@
 import apiClient from "./apiClient";
 
-export const getAllSteps = async () => {
+export const getAllSteps = async (filter = {}) => {
   try {
-    const response = await apiClient.get("/Steps");
+    const response = await apiClient.get("/Steps", { params: filter });
     return response.data;
   } catch (error) {
     throw error.response.data;

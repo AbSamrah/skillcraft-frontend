@@ -19,7 +19,6 @@ const HomePage = () => {
           getAllRoadmaps(),
           getAllQuizzes(),
         ]);
-        // Get the first 3 items for the homepage preview
         setRoadmaps(roadmapsData.slice(0, 3));
         setQuizzes(quizzesData.slice(0, 3));
       } catch (err) {
@@ -49,61 +48,64 @@ const HomePage = () => {
       {error && <div className="alert alert-danger">{error}</div>}
 
       {!loading && !error && (
-        <div className="row">
-          {/* Roadmaps Section */}
-          <div className="col-lg-6 mb-4">
-            <h2>Featured Roadmaps</h2>
-            <p>Start your learning journey with one of our popular roadmaps.</p>
+        <>
+          <div className="mb-5">
+            <h2 className="text-center mb-4">Featured Roadmaps</h2>
             {roadmaps.length > 0 ? (
-              roadmaps.map((roadmap) => (
-                <Card key={roadmap.id} className="mb-3">
-                  <div className="card-body">
-                    <h5 className="card-title">{roadmap.name}</h5>
-                    <p className="card-text">{roadmap.description}</p>
-                    <Link to={`/roadmaps/${roadmap.id}`}>
-                      <Button>View Roadmap</Button>
-                    </Link>
+              // FIX: Changed the grid layout for smaller cards
+              <div className="row g-4 justify-content-center">
+                {roadmaps.map((roadmap) => (
+                  <div className="col-md-6 col-lg-4" key={roadmap.id}>
+                    <Card className="h-100">
+                      <div className="card-body">
+                        <h5 className="card-title">{roadmap.name}</h5>
+                        <Link to={`/roadmaps/${roadmap.id}`}>
+                          <Button>View Roadmap</Button>
+                        </Link>
+                      </div>
+                    </Card>
                   </div>
-                </Card>
-              ))
+                ))}
+              </div>
             ) : (
               <p>No roadmaps available at the moment.</p>
             )}
-            <div className="text-center mt-3">
+            <div className="text-center mt-4">
               <Link to="/roadmaps">
                 <Button variant="secondary">View All Roadmaps</Button>
               </Link>
             </div>
           </div>
 
-          {/* Quizzes Section */}
-          <div className="col-lg-6 mb-4">
-            <h2>Latest Quizzes</h2>
-            <p>
-              Challenge yourself and test your knowledge with these quizzes.
-            </p>
+          <div>
+            <h2 className="text-center mb-4">Latest Quizzes</h2>
             {quizzes.length > 0 ? (
-              quizzes.map((quiz) => (
-                <Card key={quiz.id} className="mb-3">
-                  <div className="card-body">
-                    <h5 className="card-title">{quiz.question}</h5>
-                    <p className="card-text">Category: {quiz.tag}</p>
-                    <Link to="/quizzes">
-                      <Button>Take Quiz</Button>
-                    </Link>
+              // FIX: Changed the grid layout for smaller cards
+              <div className="row g-4 justify-content-center">
+                {quizzes.map((quiz) => (
+                  <div className="col-md-6 col-lg-4" key={quiz.id}>
+                    <Card className="h-100">
+                      <div className="card-body">
+                        <h5 className="card-title">{quiz.question}</h5>
+                        <p className="card-text">Category: {quiz.tag}</p>
+                        <Link to={`/quizzes/${quiz.id}`}>
+                          <Button>Take Quiz</Button>
+                        </Link>
+                      </div>
+                    </Card>
                   </div>
-                </Card>
-              ))
+                ))}
+              </div>
             ) : (
               <p>No quizzes available at the moment.</p>
             )}
-            <div className="text-center mt-3">
+            <div className="text-center mt-4">
               <Link to="/quizzes">
                 <Button variant="secondary">View All Quizzes</Button>
               </Link>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

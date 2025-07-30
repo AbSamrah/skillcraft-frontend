@@ -18,7 +18,7 @@ const LoginPage = () => {
     try {
       const token = await apiLogin({ email, password });
       login(token); // Update the global state with the new token
-      navigate("/dashboard"); // Redirect to the user's dashboard
+      navigate("/dashboard"); // Redirect to the home
     } catch (err) {
       console.error("Login failed:", err);
       setError("Failed to log in. Please check your credentials.");
