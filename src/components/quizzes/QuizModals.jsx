@@ -2,38 +2,57 @@ import React, { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import { createQuiz, updateQuiz } from "../../api/quizzes";
 
-// Modal for Creating a New Quiz
-export const CreateQuizModal = ({ show, handleClose, onQuizCreated }) => {
-  const [formData, setFormData] = useState({
-    question: "",
-    options: ["", "", "", ""],
-    answer: "",
-    tag: "",
-  });
+const tagsToArray = (tagsString) => {
+  if (!tagsString || typeof tagsString !== "string") return [];
+  return tagsString
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+};
+
+const getInitialFormData = (initialData) => ({
+  question: initialData?.question || "",
+  options: initialData?.options || ["", "", "", ""],
+  answer: initialData?.answer || "",
+  isTrue: initialData?.isTrue ?? true,
+  type: initialData?.type || "MultipleChoicesQuiz",
+});
+
+export const CreateQuizModal = ({
+  show,
+  handleClose,
+  onQuizCreated,
+  initialData,
+}) => {
+  const [quizType, setQuizType] = useState(
+    initialData?.type || "MultipleChoicesQuiz"
+  );
+  const [formData, setFormData] = useState(getInitialFormData(initialData));
+  const [tags, setTags] = useState(
+    Array.isArray(initialData?.tags) ? initialData.tags.join(", ") : ""
+  );
   const [error, setError] = useState("");
 
-  const resetForm = () => {
-    setFormData({
-      question: "",
-      options: ["", "", "", ""],
-      answer: "",
-      tag: "",
-    });
-    setError("");
-  };
-
-  const handleModalClose = () => {
-    resetForm();
-    handleClose();
-  };
+  useEffect(() => {
+    if (initialData) {
+      setFormData(getInitialFormData(initialData));
+      setTags(
+        Array.isArray(initialData.tags) ? initialData.tags.join(", ") : ""
+      );
+      setQuizType(initialData.type || "MultipleChoicesQuiz");
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleOptionChange = (index, value) => {
-    const newOptions = [...formData.options];
+    const newOptions = [...(formData.options || ["", "", "", ""])];
     newOptions[index] = value;
     setFormData((prev) => ({ ...prev, options: newOptions }));
   };
@@ -41,47 +60,45 @@ export const CreateQuizModal = ({ show, handleClose, onQuizCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (
-      !formData.question ||
-      !formData.answer ||
-      formData.options.some((opt) => !opt)
-    ) {
-      setError("Please fill out all fields.");
-      return;
-    }
-    if (!formData.options.includes(formData.answer)) {
-      setError("The correct answer must be one of the provided options.");
-      return;
-    }
-
     try {
-      await createQuiz(formData);
+      const payload = { ...formData, tags: tagsToArray(tags), type: quizType };
+      await createQuiz(payload);
       onQuizCreated();
-      handleModalClose();
+      handleClose();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create quiz.");
+      setError("Failed to create quiz.");
     }
   };
 
   if (!show) return null;
 
   return (
-    <div
-      className="modal show"
-      style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-      tabIndex="-1">
+    <div className="modal show d-block" tabIndex="-1">
       <div className="modal-dialog">
         <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Create New Quiz</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={handleModalClose}></button>
-          </div>
           <form onSubmit={handleSubmit}>
+            <div className="modal-header">
+              <h5 className="modal-title">Create New Quiz</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={handleClose}></button>
+            </div>
             <div className="modal-body">
               {error && <div className="alert alert-danger">{error}</div>}
+              <div className="mb-3">
+                <label htmlFor="quizType" className="form-label">
+                  Quiz Type
+                </label>
+                <select
+                  id="quizType"
+                  className="form-select"
+                  value={quizType}
+                  onChange={(e) => setQuizType(e.target.value)}>
+                  <option value="MultipleChoicesQuiz">Multiple Choice</option>
+                  <option value="TrueOrFalseQuiz">True/False</option>
+                </select>
+              </div>
               <div className="mb-3">
                 <label htmlFor="question" className="form-label">
                   Question
@@ -91,64 +108,80 @@ export const CreateQuizModal = ({ show, handleClose, onQuizCreated }) => {
                   className="form-control"
                   id="question"
                   name="question"
-                  value={formData.question}
+                  value={formData.question || ""}
                   onChange={handleChange}
                   required
                 />
               </div>
-              {formData.options.map((option, index) => (
-                <div className="mb-3" key={index}>
-                  <label htmlFor={`option${index}`} className="form-label">
-                    Option {index + 1}
-                  </label>
+              {quizType === "MultipleChoicesQuiz" && (
+                <>
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div className="mb-3" key={index}>
+                      <label htmlFor={`option${index}`} className="form-label">
+                        Option {index + 1}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id={`option${index}`}
+                        value={formData.options?.[index] || ""}
+                        onChange={(e) =>
+                          handleOptionChange(index, e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  ))}
+                  <div className="mb-3">
+                    <label htmlFor="answer" className="form-label">
+                      Correct Answer
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="answer"
+                      name="answer"
+                      value={formData.answer || ""}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+              {quizType === "TrueOrFalseQuiz" && (
+                <div className="mb-3 form-check">
                   <input
-                    type="text"
-                    className="form-control"
-                    id={`option${index}`}
-                    value={option}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    required
+                    type="checkbox"
+                    className="form-check-input"
+                    id="isTrue"
+                    name="isTrue"
+                    checked={formData.isTrue}
+                    onChange={handleChange}
                   />
+                  <label className="form-check-label" htmlFor="isTrue">
+                    The statement is True
+                  </label>
                 </div>
-              ))}
+              )}
               <div className="mb-3">
-                <label htmlFor="answer" className="form-label">
-                  Correct Answer
+                <label htmlFor="tags" className="form-label">
+                  Tags (comma-separated)
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  id="answer"
-                  name="answer"
-                  value={formData.answer}
-                  onChange={handleChange}
-                  placeholder="Must match one of the options"
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="tag" className="form-label">
-                  Tag
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="tag"
-                  name="tag"
-                  value={formData.tag}
-                  onChange={handleChange}
-                  required
+                  id="tags"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder="e.g., JavaScript, React"
                 />
               </div>
             </div>
             <div className="modal-footer">
-              <Button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleModalClose}>
+              <Button type="button" variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button type="submit" className="btn btn-primary">
+              <Button type="submit" variant="primary">
                 Create Quiz
               </Button>
             </div>
@@ -159,36 +192,31 @@ export const CreateQuizModal = ({ show, handleClose, onQuizCreated }) => {
   );
 };
 
-// Modal for Editing an Existing Quiz
 export const EditQuizModal = ({ show, handleClose, quiz, onQuizUpdated }) => {
-  // **FIX:** Initialize formData with a default structure to prevent the "uncontrolled input" warning.
-  const [formData, setFormData] = useState({
-    question: "",
-    options: ["", "", "", ""],
-    answer: "",
-    tag: "",
-  });
+  const [formData, setFormData] = useState({});
+  const [tags, setTags] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (quiz) {
-      // When the quiz data is passed as a prop, update the form state.
-      // Provide fallbacks to empty strings/arrays to be safe.
       setFormData({
-        question: quiz.question || "",
-        options: quiz.options || ["", "", "", ""],
-        answer: quiz.answer || "",
-        tag: quiz.tag || "",
+        ...quiz,
+        isTrue: quiz.isTrue ?? true, // Default to true if not present
       });
+      setTags(Array.isArray(quiz.tags) ? quiz.tags.join(", ") : "");
     }
   }, [quiz]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
+
   const handleOptionChange = (index, value) => {
-    const newOptions = [...formData.options];
+    const newOptions = [...(formData.options || ["", "", "", ""])];
     newOptions[index] = value;
     setFormData((prev) => ({ ...prev, options: newOptions }));
   };
@@ -196,44 +224,30 @@ export const EditQuizModal = ({ show, handleClose, quiz, onQuizUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (
-      !formData.question ||
-      !formData.answer ||
-      formData.options.some((opt) => !opt)
-    ) {
-      setError("Please fill out all fields.");
-      return;
-    }
-    if (!formData.options.includes(formData.answer)) {
-      setError("The correct answer must be one of the provided options.");
-      return;
-    }
     try {
-      await updateQuiz(quiz.id, formData);
+      const payload = { ...formData, tags: tagsToArray(tags) };
+      await updateQuiz(quiz.id, payload);
       onQuizUpdated();
       handleClose();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update quiz.");
+      setError("Failed to update quiz.");
     }
   };
 
   if (!show) return null;
 
   return (
-    <div
-      className="modal show"
-      style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-      tabIndex="-1">
+    <div className="modal show d-block" tabIndex="-1">
       <div className="modal-dialog">
         <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Edit Quiz</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={handleClose}></button>
-          </div>
           <form onSubmit={handleSubmit}>
+            <div className="modal-header">
+              <h5 className="modal-title">Edit Quiz</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={handleClose}></button>
+            </div>
             <div className="modal-body">
               {error && <div className="alert alert-danger">{error}</div>}
               <div className="mb-3">
@@ -245,63 +259,79 @@ export const EditQuizModal = ({ show, handleClose, quiz, onQuizUpdated }) => {
                   className="form-control"
                   id="question"
                   name="question"
-                  value={formData.question}
+                  value={formData.question || ""}
                   onChange={handleChange}
                   required
                 />
               </div>
-              {formData.options.map((option, index) => (
-                <div className="mb-3" key={index}>
-                  <label htmlFor={`option${index}`} className="form-label">
-                    Option {index + 1}
-                  </label>
+              {formData.type === "MultipleChoicesQuiz" && (
+                <>
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div className="mb-3" key={index}>
+                      <label htmlFor={`option${index}`} className="form-label">
+                        Option {index + 1}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id={`option${index}`}
+                        value={formData.options?.[index] || ""}
+                        onChange={(e) =>
+                          handleOptionChange(index, e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  ))}
+                  <div className="mb-3">
+                    <label htmlFor="answer" className="form-label">
+                      Correct Answer
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="answer"
+                      name="answer"
+                      value={formData.answer || ""}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+              {formData.type === "TrueOrFalseQuiz" && (
+                <div className="mb-3 form-check">
                   <input
-                    type="text"
-                    className="form-control"
-                    id={`option${index}`}
-                    value={option}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    required
+                    type="checkbox"
+                    className="form-check-input"
+                    id="isTrue"
+                    name="isTrue"
+                    checked={formData.isTrue}
+                    onChange={handleChange}
                   />
+                  <label className="form-check-label" htmlFor="isTrue">
+                    The statement is True
+                  </label>
                 </div>
-              ))}
+              )}
               <div className="mb-3">
-                <label htmlFor="answer" className="form-label">
-                  Correct Answer
+                <label htmlFor="tags" className="form-label">
+                  Tags (comma-separated)
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  id="answer"
-                  name="answer"
-                  value={formData.answer}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="tag" className="form-label">
-                  Tag
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="tag"
-                  name="tag"
-                  value={formData.tag}
-                  onChange={handleChange}
-                  required
+                  id="tags"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
                 />
               </div>
             </div>
             <div className="modal-footer">
-              <Button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleClose}>
+              <Button type="button" variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button type="submit" className="btn btn-primary">
+              <Button type="submit" variant="primary">
                 Save Changes
               </Button>
             </div>

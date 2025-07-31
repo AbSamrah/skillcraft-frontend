@@ -1,35 +1,46 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getQuizById, checkAnswer } from "../../api/quizzes";
 import useAuth from "../../hooks/useAuth";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
+import "../../assets/styles/QuizOptions.css";
 
 const TakeQuizPage = () => {
   const { id: quizId } = useParams();
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { quizType } = location.state || {};
+
   const { user } = useAuth();
   const [quiz, setQuiz] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [result, setResult] = useState(null); // null, 'correct', or 'incorrect'
+  const [result, setResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchQuiz = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    if (!quizType) {
+      setError("Quiz type not provided. Cannot load quiz.");
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
-      const data = await getQuizById(quizId);
+      const data = await getQuizById(quizId, quizType);
       setQuiz(data);
     } catch (err) {
       setError("Failed to load the quiz. Please try again later.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [quizId, user]);
+  }, [quizId, user, quizType]);
 
   useEffect(() => {
     fetchQuiz();
@@ -48,17 +59,15 @@ const TakeQuizPage = () => {
     }
     setIsSubmitting(true);
     try {
-      const isCorrect = await checkAnswer(quizId, selectedAnswer);
+      const isCorrect = await checkAnswer(quizId, selectedAnswer, quiz.type);
       setResult(isCorrect ? "correct" : "incorrect");
     } catch (err) {
       alert("Could not check the answer. Please try again.");
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // FIX: Add a function to reset the quiz state
   const handleReanswer = () => {
     setSelectedAnswer(null);
     setResult(null);
@@ -74,21 +83,47 @@ const TakeQuizPage = () => {
       <Card>
         <div className="card-body">
           <h4 className="card-title">{quiz.question}</h4>
-          <p className="text-muted">Topic: {quiz.topic}</p>
+          <div className="mt-2 mb-3">
+            {quiz.tags?.map((tag) => (
+              <span key={tag} className="badge bg-info me-1">
+                {tag}
+              </span>
+            ))}
+          </div>
           <hr />
           <div className="options-container my-4">
-            {quiz.options?.map((option, index) => (
-              <Button
-                key={index}
-                variant={
-                  selectedAnswer === option ? "primary" : "outline-secondary"
-                }
-                onClick={() => handleAnswerChange(option)}
-                className="d-block w-100 text-start mb-2"
-                disabled={!!result}>
-                {option}
-              </Button>
-            ))}
+            {quiz.type === "MultipleChoices" &&
+              quiz.options?.map((option, index) => (
+                <button
+                  key={index}
+                  className={`quiz-option-btn ${
+                    selectedAnswer === option ? "selected" : ""
+                  }`}
+                  onClick={() => handleAnswerChange(option)}
+                  disabled={!!result}>
+                  {option}
+                </button>
+              ))}
+            {quiz.type === "TrueOrFalse" && (
+              <>
+                <button
+                  className={`quiz-option-btn ${
+                    selectedAnswer === true ? "selected" : ""
+                  }`}
+                  onClick={() => handleAnswerChange(true)}
+                  disabled={!!result}>
+                  True
+                </button>
+                <button
+                  className={`quiz-option-btn ${
+                    selectedAnswer === false ? "selected" : ""
+                  }`}
+                  onClick={() => handleAnswerChange(false)}
+                  disabled={!!result}>
+                  False
+                </button>
+              </>
+            )}
           </div>
 
           {!result ? (
