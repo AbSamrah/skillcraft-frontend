@@ -1,9 +1,5 @@
 import apiClient from "./apiClient";
 
-/**
- * Fetches all quizzes of every type from the server.
- * @returns {Promise<Array>} A promise that resolves to an array of all quizzes.
- */
 export const getAllQuizzes = async (filter = {}) => {
   try {
     const response = await apiClient.get("/Quizzes", {
@@ -29,12 +25,6 @@ export const getAllQuizzes = async (filter = {}) => {
   }
 };
 
-/**
- * Fetches a single quiz by its ID. It requires the quiz type to call the correct endpoint.
- * @param {string} id - The ID of the quiz to fetch.
- * @param {string} type - The type of quiz ('MultipleChoicesQuiz' or 'TrueOrFalseQuiz').
- * @returns {Promise<Object>} A promise that resolves to the quiz object.
- */
 export const getQuizById = async (id, type) => {
   try {
     const endpoint = type === "MultipleChoices" ? `mcq/${id}` : `tfq/${id}`;
@@ -46,11 +36,6 @@ export const getQuizById = async (id, type) => {
   }
 };
 
-/**
- * Creates a new quiz. The quizData must contain a 'type' field.
- * @param {Object} quizData - The data for the new quiz.
- * @returns {Promise<Object>} A promise that resolves to the newly created quiz object.
- */
 export const createQuiz = async (quizData) => {
   try {
     const endpoint =
@@ -63,12 +48,6 @@ export const createQuiz = async (quizData) => {
   }
 };
 
-/**
- * Updates an existing quiz. The quizData must contain a 'type' field.
- * @param {string} id - The ID of the quiz to update.
- * @param {Object} quizData - The updated data for the quiz.
- * @returns {Promise<Object>} A promise that resolves to the updated quiz object.
- */
 export const updateQuiz = async (id, quizData) => {
   try {
     const endpoint =
@@ -81,11 +60,6 @@ export const updateQuiz = async (id, quizData) => {
   }
 };
 
-/**
- * Deletes a quiz by its ID.
- * @param {string} id - The ID of the quiz to delete.
- * @returns {Promise<void>}
- */
 export const deleteQuiz = async (id) => {
   try {
     await apiClient.delete(`/Quizzes/${id}`);
@@ -95,13 +69,6 @@ export const deleteQuiz = async (id) => {
   }
 };
 
-/**
- * Checks if an answer is correct for a given quiz.
- * @param {string} id - The ID of the quiz.
- * @param {string|boolean} answer - The user's selected answer.
- * @param {string} type - The type of quiz ('MultipleChoicesQuiz' or 'TrueOrFalseQuiz').
- * @returns {Promise<boolean>} A promise that resolves to true if correct, false otherwise.
- */
 export const checkAnswer = async (id, userId, answer, type) => {
   try {
     const endpoint =
@@ -116,11 +83,6 @@ export const checkAnswer = async (id, userId, answer, type) => {
   }
 };
 
-/**
- * Generates a new Multiple Choice quiz using AI.
- * @param {Object} params - The parameters for the quiz, including topic and difficulty.
- * @returns {Promise<Object>} A promise that resolves to the generated quiz data.
- */
 export const generateMcqWithAi = async (params) => {
   try {
     const response = await apiClient.post("/Quizzes/mcq/ai", params);
@@ -131,11 +93,6 @@ export const generateMcqWithAi = async (params) => {
   }
 };
 
-/**
- * Generates a new True/False quiz using AI.
- * @param {Object} params - The parameters for the quiz, including topic and difficulty.
- * @returns {Promise<Object>} A promise that resolves to the generated quiz data.
- */
 export const generateTfqWithAi = async (params) => {
   try {
     const response = await apiClient.post("/Quizzes/tfq/ai", params);

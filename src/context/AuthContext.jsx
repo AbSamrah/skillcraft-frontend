@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
         return null;
       }
       return {
-        id: decoded.id, // Extract the user ID
+        id: decoded.id,
         firstName: decoded.given_name,
         lastName: decoded.family_name,
         email: decoded.email,

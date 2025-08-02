@@ -36,7 +36,6 @@ export const updateMilestone = async (id, milestoneData) => {
   }
 };
 
-// ADD THIS FUNCTION
 export const deleteMilestone = async (id) => {
   try {
     const response = await apiClient.delete(`/Milestones/${id}`);

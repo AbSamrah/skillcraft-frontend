@@ -6,7 +6,6 @@ const apiClient = axios.create({
   baseURL: API_URL,
 });
 
-// FIX: Add a request interceptor to attach the auth token to every request
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
@@ -20,7 +19,6 @@ apiClient.interceptors.request.use(
   }
 );
 
-// This response interceptor is correct and handles logging out on 401 errors.
 apiClient.interceptors.response.use(
   (response) => {
     return response;

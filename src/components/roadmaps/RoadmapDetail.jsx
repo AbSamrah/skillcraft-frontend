@@ -243,7 +243,6 @@ const RoadmapDetail = () => {
                         id={`step-${step.id}`}
                         checked={selectedSteps.has(step.id)}
                         onChange={() => handleStepSelectionChange(step.id)}
-                        // FIX: Disable checkboxes for non-User roles
                         disabled={!user || user.role !== "User"}
                       />
                       <label

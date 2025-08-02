@@ -52,7 +52,6 @@ const HomePage = () => {
           <div className="mb-5">
             <h2 className="text-center mb-4">Featured Roadmaps</h2>
             {roadmaps.length > 0 ? (
-              // FIX: Changed the grid layout for smaller cards
               <div className="row g-4 justify-content-center">
                 {roadmaps.map((roadmap) => (
                   <div className="col-md-6 col-lg-4" key={roadmap.id}>
@@ -80,7 +79,6 @@ const HomePage = () => {
           <div>
             <h2 className="text-center mb-4">Latest Quizzes</h2>
             {quizzes.length > 0 ? (
-              // FIX: Changed the grid layout for smaller cards
               <div className="row g-4 justify-content-center">
                 {quizzes.map((quiz) => (
                   <div className="col-md-6 col-lg-4" key={quiz.id}>

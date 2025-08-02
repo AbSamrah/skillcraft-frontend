@@ -44,10 +44,9 @@ const QuizList = ({ quizzes, onEdit, onDelete, showActions = false }) => {
                     </Button>
                   </div>
                 ) : (
-                  // FIX: Added the 'state' prop to pass the quiz type
                   <Link
                     to={`/quizzes/${quiz.id}`}
-                    state={{ quizType: quiz.type }} // This line fixes the error
+                    state={{ quizType: quiz.type }}
                     className="btn btn-primary mt-3">
                     Take Quiz
                   </Link>

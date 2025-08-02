@@ -11,7 +11,6 @@ const RoadmapList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State for the AI generator
   const [aiTopic, setAiTopic] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -43,7 +42,6 @@ const RoadmapList = () => {
     setAiError("");
     try {
       const generatedRoadmap = await generateRoadmapWithAi(aiTopic);
-      // Navigate to the editor, passing the AI-generated data
       navigate("/editor/roadmaps/new", { state: { generatedRoadmap } });
     } catch (err) {
       setAiError("Failed to generate roadmap. Please try again.");
@@ -64,8 +62,6 @@ const RoadmapList = () => {
   return (
     <div className="container py-5">
       <h1 className="text-center mb-4">Explore Roadmaps</h1>
-
-      {/* AI Generator Input Bar - visible only if logged in */}
       {user && (
         <div className="ai-input-container">
           <form onSubmit={handleAiGenerate}>

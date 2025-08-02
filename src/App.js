@@ -23,11 +23,11 @@ import AdminDashboard from "./pages/admin/DashboardPage";
 import UserManagement from "./pages/admin/UserManagementPage";
 import EditorDashboard from "./pages/editor/ContentDashboardPage";
 import RoadmapEditor from "./pages/editor/RoadmapEditorPage";
-// A new component to handle the main dashboard redirection logic
+
 const DashboardRedirect = () => {
   const { user, loading } = useAuth();
 
-  if (loading) return null; // Or a loading spinner
+  if (loading) return null;
 
   if (!user) return <Navigate to="/login" replace />;
 

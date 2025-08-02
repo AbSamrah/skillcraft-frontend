@@ -31,7 +31,6 @@ export const CreateQuizModal = ({
       setTags(Array.isArray(initialData?.tags) ? initialData.tags : []);
       setQuizType(initialData?.type || "MultipleChoices");
     } else {
-      // Reset form when modal is closed
       setFormData(getInitialFormData());
       setTags([]);
       setCurrentTag("");
@@ -230,7 +229,6 @@ export const CreateQuizModal = ({
 };
 
 export const EditQuizModal = ({ show, handleClose, quiz, onQuizUpdated }) => {
-  // FIX: Initialize formData with a default structure
   const [formData, setFormData] = useState({
     question: "",
     options: ["", "", "", ""],
@@ -248,7 +246,6 @@ export const EditQuizModal = ({ show, handleClose, quiz, onQuizUpdated }) => {
       if (quiz) {
         setLoading(true);
         try {
-          // FIX: Call getQuizById to get the full quiz details, including the answer
           const fullQuizData = await getQuizById(quiz.id, quiz.type);
 
           setFormData({

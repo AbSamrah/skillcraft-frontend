@@ -33,7 +33,6 @@ const CreateStepModal = ({ show, handleClose, onStepCreated }) => {
       const newStep = await createStep(payload);
       onStepCreated(newStep);
 
-      // Reset form
       setName("");
       setDescription("");
       setDuration({ days: 0, hours: 0, minutes: 0 });

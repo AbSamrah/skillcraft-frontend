@@ -36,7 +36,6 @@ export const updateRoadmap = async (id, roadmapData) => {
   }
 };
 
-// ADD THIS FUNCTION
 export const deleteRoadmap = async (id) => {
   try {
     const response = await apiClient.delete(`/Roadmaps/${id}`);

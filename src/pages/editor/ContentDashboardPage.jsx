@@ -49,7 +49,6 @@ const ContentDashboardPage = () => {
     steps: false,
   });
 
-  // State for modals
   const [showCreateStep, setShowCreateStep] = useState(false);
   const [showEditStep, setShowEditStep] = useState(false);
   const [editingStep, setEditingStep] = useState(null);
@@ -238,7 +237,6 @@ const ContentDashboardPage = () => {
           {data.roadmaps.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
-              {/* FIX: Truncate the description to 100 characters */}
               <td>{truncateText(item.description, 100)}</td>
               <td>{item.tags?.join(", ")}</td>
               <td>

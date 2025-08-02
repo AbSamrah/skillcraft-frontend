@@ -7,7 +7,7 @@ import {
   generateTfqWithAi,
 } from "../api/quizzes";
 import useAuth from "../hooks/useAuth";
-import "../assets/styles/AiGenerator.css"; // Re-use the same great style
+import "../assets/styles/AiGenerator.css";
 import Button from "../components/ui/Button";
 
 const QuizzesPage = () => {
@@ -66,7 +66,7 @@ const QuizzesPage = () => {
 
   const removeTag = (tagToRemove) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
-    setPageNumber(0); // Reset to first page when a tag is removed
+    setPageNumber(0);
   };
 
   const handleAiGenerate = async (generatorFunction, quizType) => {
@@ -80,12 +80,10 @@ const QuizzesPage = () => {
       const params = { topic: aiTopic, difficulty: aiDifficulty };
       const generatedQuiz = await generatorFunction(params);
 
-      // FIX: Ensure tags is an array, not null
       if (!generatedQuiz.tags) {
         generatedQuiz.tags = [];
       }
 
-      // FIX: Navigate directly to the newly generated quiz page
       navigate(`/quizzes/${generatedQuiz.id}`, {
         state: { quizType: generatedQuiz.type },
       });

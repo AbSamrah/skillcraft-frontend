@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import { createMilestone } from "../../api/milestones";
 import { getAllSteps } from "../../api/steps";
-import CreateStepModal from "./CreateStepModal"; // We need this for creating steps on the fly
+import CreateStepModal from "./CreateStepModal";
 
 const CreateMilestoneModal = ({ show, handleClose, onMilestoneCreated }) => {
   const [name, setName] = useState("");
@@ -11,7 +11,6 @@ const CreateMilestoneModal = ({ show, handleClose, onMilestoneCreated }) => {
   const [selectedSteps, setSelectedSteps] = useState([]);
   const [showCreateStepModal, setShowCreateStepModal] = useState(false);
 
-  // Fetch all available steps when the modal is opened
   useEffect(() => {
     if (show) {
       const fetchSteps = async () => {
@@ -26,18 +25,15 @@ const CreateMilestoneModal = ({ show, handleClose, onMilestoneCreated }) => {
     }
   }, [show]);
 
-  // When a new step is created in the child modal, add it to our list
   const handleStepCreated = (newStep) => {
     setAvailableSteps((prev) => [...prev, newStep]);
   };
 
-  // Move a step from the "Available" list to the "Selected" list
   const handleAddStep = (step) => {
     setSelectedSteps((prev) => [...prev, step]);
     setAvailableSteps((prev) => prev.filter((s) => s.id !== step.id));
   };
 
-  // Move a step from the "Selected" list back to the "Available" list
   const handleRemoveStep = (step) => {
     setAvailableSteps((prev) => [...prev, step]);
     setSelectedSteps((prev) => prev.filter((s) => s.id !== step.id));
@@ -54,7 +50,6 @@ const CreateMilestoneModal = ({ show, handleClose, onMilestoneCreated }) => {
       const newMilestone = await createMilestone(payload);
       onMilestoneCreated(newMilestone);
 
-      // Reset form state for the next time it opens
       setName("");
       setDescription("");
       setSelectedSteps([]);
@@ -166,7 +161,6 @@ const CreateMilestoneModal = ({ show, handleClose, onMilestoneCreated }) => {
           </div>
         </div>
       </div>
-      {/* The nested modal for creating steps */}
       <CreateStepModal
         show={showCreateStepModal}
         handleClose={() => setShowCreateStepModal(false)}

@@ -6,7 +6,7 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return null; // or a loading spinner
+    return null;
   }
 
   if (!user) {
@@ -17,7 +17,6 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Render the child component passed to it
   return children;
 };
 

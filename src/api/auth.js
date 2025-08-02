@@ -12,7 +12,6 @@ export const signup = async (userData) => {
 export const login = async (credentials) => {
   try {
     const response = await apiClient.post("/Auth/login", credentials);
-    // Store the token upon successful login
     if (response.data) {
       localStorage.setItem("authToken", response.data);
     }
@@ -32,6 +31,5 @@ export const changePassword = async (passwordData) => {
 };
 
 export const logout = () => {
-  // Remove the token from local storage
   localStorage.removeItem("authToken");
 };

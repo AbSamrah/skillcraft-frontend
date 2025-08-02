@@ -3,13 +3,11 @@ import Button from "../../components/ui/Button";
 import { getAllUsers, deleteUser, updateUser } from "../../api/users";
 import { getAllRoles } from "../../api/roles";
 
-// Modal for Editing a User
 const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
   const [formData, setFormData] = useState({ role: "" });
   const [roles, setRoles] = useState([]);
 
   useEffect(() => {
-    // When the modal is shown and we have a user, fetch roles and set the form data
     if (show && user) {
       const fetchRoles = async () => {
         const availableRoles = await getAllRoles();
@@ -34,7 +32,7 @@ const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
     e.preventDefault();
     try {
       await updateUser(formData.id, formData);
-      onUserUpdated(); // This will trigger a refresh of the user list
+      onUserUpdated();
       handleClose();
     } catch (error) {
       console.error("Failed to update user:", error);
@@ -103,11 +101,10 @@ const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
   );
 };
 
-// Main User Management Page
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editingUser, setEditingUser] = useState(null); // State to hold the user being edited
+  const [editingUser, setEditingUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
   const fetchUsers = async () => {
@@ -143,7 +140,7 @@ const UserManagementPage = () => {
   };
 
   const handleUserUpdated = () => {
-    fetchUsers(); // Refresh the user list after an update
+    fetchUsers();
   };
 
   if (loading) return <p className="text-center mt-5">Loading users...</p>;

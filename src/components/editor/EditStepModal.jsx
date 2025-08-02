@@ -13,10 +13,9 @@ const EditStepModal = ({ show, handleClose, step, onStepUpdated }) => {
       setName(step.name);
       setDescription(step.description);
 
-      // Deconstruct total minutes into days, hours, and minutes for the form
       const totalMinutes = step.durationInMinutes || 0;
       const minutesInHour = 60;
-      const hoursInDay = 8; // Assuming 8-hour work day
+      const hoursInDay = 8;
 
       const totalHours = totalMinutes / minutesInHour;
       const days = Math.floor(totalHours / hoursInDay);
@@ -35,7 +34,7 @@ const EditStepModal = ({ show, handleClose, step, onStepUpdated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError("");
     const totalMinutes =
       duration.days * 8 * 60 + duration.hours * 60 + duration.minutes;
 

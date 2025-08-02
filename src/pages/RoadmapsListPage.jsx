@@ -12,11 +12,10 @@ const RoadmapsListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- NEW: State for search and pagination ---
   const [searchTerm, setSearchTerm] = useState("");
   const [pageNumber, setPageNumber] = useState(0);
   const [isLastPage, setIsLastPage] = useState(false);
-  const pageSize = 9; // You can adjust the page size here
+  const pageSize = 9;
 
   const [aiTopic, setAiTopic] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -48,7 +47,7 @@ const RoadmapsListPage = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setPageNumber(0); // Reset to first page on new search
+    setPageNumber(0);
   };
 
   const handleAiGenerate = async (e) => {
@@ -151,7 +150,6 @@ const RoadmapsListPage = () => {
         ))}
       </div>
 
-      {/* --- NEW: Pagination Controls --- */}
       <div className="d-flex justify-content-center align-items-center mt-5">
         <Button
           onClick={() => setPageNumber((p) => Math.max(0, p - 1))}

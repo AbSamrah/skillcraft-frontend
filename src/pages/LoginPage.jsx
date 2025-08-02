@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
-import { login as apiLogin } from "../api/auth"; // Renamed to avoid conflict
+import { login as apiLogin } from "../api/auth";
 import useAuth from "../hooks/useAuth";
 
 const LoginPage = () => {
@@ -10,15 +10,15 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth(); // The login function from our AuthContext
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError("");
     try {
       const token = await apiLogin({ email, password });
-      login(token); // Update the global state with the new token
-      navigate("/dashboard"); // Redirect to the home
+      login(token);
+      navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
       setError("Failed to log in. Please check your credentials.");

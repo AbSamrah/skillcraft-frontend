@@ -106,11 +106,11 @@
 }
 
 .roadmap-details-card {
-  background-color: #f8f9fa; /* A light background color */
+  background-color: #f8f9fa;
   border-radius: 8px;
   padding: 2rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  text-align: left; /* Align text to the left */
+  text-align: left;
 }
 
 .roadmap-title {
@@ -120,14 +120,14 @@
 
 .roadmap-description {
   font-size: 1.1rem;
-  color: #6c757d; /* Muted text color */
+  color: #6c757d;
   margin-bottom: 1.5rem;
 }
 
 .metrics-container {
   display: flex;
   gap: 2rem;
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  flex-wrap: wrap;
 }
 
 .metric-item {
@@ -148,9 +148,9 @@
 }
 
 .duration-metric {
-  color: #0d6efd; /* Blue */
+  color: #0d6efd;
 }
 
 .salary-metric {
-  color: #198754; /* Green */
+  color: #198754;
 }

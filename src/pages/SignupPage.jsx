@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
-import { signup as apiSignup } from "../api/auth"; // Import the signup function
-import useAuth from "../hooks/useAuth"; // Import useAuth to log the user in
+import { signup as apiSignup } from "../api/auth";
+import useAuth from "../hooks/useAuth";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const SignupPage = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth(); // Get the login function from our context
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -22,17 +22,13 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError("");
     try {
-      // Call the signup API function
       const token = await apiSignup(formData);
-      // If signup is successful, log the user in with the received token
       login(token);
-      // Redirect to the home
       navigate("/dashboard");
     } catch (err) {
       console.error("Signup failed:", err);
-      // Display an error message to the user
       setError(err.message || "Failed to create an account. Please try again.");
     }
   };
