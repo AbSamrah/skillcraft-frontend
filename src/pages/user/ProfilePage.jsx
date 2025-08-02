@@ -77,7 +77,7 @@ const ProfilePage = () => {
               <Card>
                 <div className="card-body">
                   <h5 className="card-title">{roadmap.name}</h5>
-                  <p className="card-text">{roadmap.description}</p>
+                  {/* FIX: Removed the description paragraph */}
                   <Link
                     to={`/roadmaps/${roadmap.id}`}
                     className="btn btn-primary me-2">

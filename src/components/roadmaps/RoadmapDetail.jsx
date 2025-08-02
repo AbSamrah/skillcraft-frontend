@@ -163,6 +163,13 @@ const RoadmapDetail = () => {
       <div className="roadmap-details-card mb-4">
         <h1 className="roadmap-title">{roadmap.name}</h1>
         <p className="roadmap-description">{roadmap.description}</p>
+        <div className="tags-container mt-2 mb-3">
+          {roadmap.tags?.map((tag) => (
+            <span key={tag} className="badge bg-primary me-1 fs-6">
+              {tag}
+            </span>
+          ))}
+        </div>
         <div className="metrics-container">
           <div className="metric-item">
             <span className="metric-label">Total Duration</span>
@@ -179,7 +186,6 @@ const RoadmapDetail = () => {
         </div>
       </div>
 
-      {/* FIX: Conditionally render this entire block for 'User' role only */}
       {user && user.role === "User" && (
         <div className="card mb-4">
           <div className="card-body">

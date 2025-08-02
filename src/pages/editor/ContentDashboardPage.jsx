@@ -16,6 +16,12 @@ import {
   EditQuizModal,
 } from "../../components/quizzes/QuizModals";
 
+const truncateText = (text, maxLength) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + "...";
+};
+
 const ContentDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("roadmaps");
   const [data, setData] = useState({
@@ -150,6 +156,7 @@ const ContentDashboardPage = () => {
     } else if (type === "quiz") {
       setEditingQuiz(item);
       setShowEditQuiz(true);
+      x;
     }
   };
 
@@ -232,7 +239,8 @@ const ContentDashboardPage = () => {
           {data.roadmaps.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
-              <td>{item.description}</td>
+              {/* FIX: Truncate the description to 100 characters */}
+              <td>{truncateText(item.description, 100)}</td>
               <td>{item.tags?.join(", ")}</td>
               <td>
                 <Button

@@ -4,9 +4,24 @@ import apiClient from "./apiClient";
  * Fetches all quizzes of every type from the server.
  * @returns {Promise<Array>} A promise that resolves to an array of all quizzes.
  */
-export const getAllQuizzes = async () => {
+export const getAllQuizzes = async (filter = {}) => {
   try {
-    const response = await apiClient.get("/Quizzes");
+    const response = await apiClient.get("/Quizzes", {
+      params: filter,
+      paramsSerializer: (params) => {
+        let result = "";
+        for (const key in params) {
+          if (Array.isArray(params[key])) {
+            params[key].forEach((val) => {
+              result += `${key}=${encodeURIComponent(val)}&`;
+            });
+          } else {
+            result += `${key}=${encodeURIComponent(params[key])}&`;
+          }
+        }
+        return result.substring(0, result.length - 1);
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Failed to fetch quizzes:", error);
@@ -39,7 +54,7 @@ export const getQuizById = async (id, type) => {
 export const createQuiz = async (quizData) => {
   try {
     const endpoint =
-      quizData.type === "MultipleChoicesQuiz" ? "mcq/manual" : "tfq/manual";
+      quizData.type === "MultipleChoices" ? "mcq/manual" : "tfq/manual";
     const response = await apiClient.post(`/Quizzes/${endpoint}`, quizData);
     return response.data;
   } catch (error) {
@@ -57,7 +72,7 @@ export const createQuiz = async (quizData) => {
 export const updateQuiz = async (id, quizData) => {
   try {
     const endpoint =
-      quizData.type === "MultipleChoicesQuiz" ? `mcq/${id}` : `tfq/${id}`;
+      quizData.type === "MultipleChoices" ? `mcq/${id}` : `tfq/${id}`;
     const response = await apiClient.put(`/Quizzes/${endpoint}`, quizData);
     return response.data;
   } catch (error) {
@@ -87,12 +102,12 @@ export const deleteQuiz = async (id) => {
  * @param {string} type - The type of quiz ('MultipleChoicesQuiz' or 'TrueOrFalseQuiz').
  * @returns {Promise<boolean>} A promise that resolves to true if correct, false otherwise.
  */
-export const checkAnswer = async (id, answer, type) => {
+export const checkAnswer = async (id, userId, answer, type) => {
   try {
     const endpoint =
       type === "MultipleChoices" ? `mcq/answer/${id}` : `tfq/answer/${id}`;
     const response = await apiClient.get(`/Quizzes/${endpoint}`, {
-      params: { answer },
+      params: { userId, answer },
     });
     return response.data;
   } catch (error) {

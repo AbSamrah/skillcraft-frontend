@@ -1,48 +1,210 @@
-/* Import Google Fonts */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+// Import Bootstrap
+@import "bootstrap/scss/bootstrap";
 
-/* Define custom variables */
+/* -------------------
+ * Color Variables
+ * ------------------- */
 :root {
-  --primary-color: #6a11cb;
-  --secondary-color: #2575fc;
-  --text-color: #333;
+  // Light Theme
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
   --background-color: #f8f9fa;
-  --card-background: #ffffff;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --surface-color: #ffffff;
+  --text-color: #212529;
+  --text-muted-color: #6c757d;
+  --border-color: #dee2e6;
+  --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  --overlay-bg: rgba(255, 255, 255, 0.85);
 }
 
-/* Apply the font and base styles to the body */
+html.dark {
+  // Dark Theme
+  --primary-color: #4dabf7;
+  --secondary-color: #868e96;
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --text-color: #e9ecef;
+  --text-muted-color: #adb5bd;
+  --border-color: #495057;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --overlay-bg: rgba(30, 30, 30, 0.85);
+}
+
+/* -------------------
+ * Global Styles
+ * ------------------- */
 body {
-  font-family: "Inter", sans-serif;
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* -------------------
+ * Component Styles
+ * ------------------- */
+
+/* Header & Footer */
+.bg-light {
+  background-color: var(--surface-color) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+.navbar-brand,
+.nav-link {
+  color: var(--text-color) !important;
+}
+.navbar-brand:hover,
+.nav-link:hover {
+  color: var(--primary-color) !important;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  background-color: var(--surface-color);
+  border-color: var(--border-color);
+}
+.dropdown-item {
+  color: var(--text-color) !important;
+}
+.dropdown-item:hover {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+.dropdown-divider {
+  border-top-color: var(--border-color);
+}
+
+/* Cards & Surfaces */
+.card,
+.roadmap-details-card,
+.timeline-content {
+  background-color: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+  color: var(--text-color) !important;
+}
+.card-title,
+.timeline-content h2 {
+  color: var(--text-color) !important;
+}
+.card-text,
+.text-muted,
+.timeline-content p {
+  color: var(--text-muted-color) !important;
+}
+.timeline-content .form-check-label {
+  color: var(--text-color) !important;
+}
+
+/* AI Generator Bar & Overlay */
+.ai-generator-container {
+  background: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+.generating-overlay {
+  background: var(--overlay-bg) !important;
+}
+.ai-input-field {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Forms & Inputs */
+.form-control,
+.form-select {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25) !important;
+}
+.form-label {
+  color: var(--text-color) !important;
+}
+.form-control::placeholder {
+  color: var(--text-muted-color) !important;
+  opacity: 1;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+.btn-outline-primary {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+.btn-outline-primary:hover {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+.quiz-option-btn {
   background-color: var(--background-color);
   color: var(--text-color);
+  border-color: var(--border-color);
+}
+.quiz-option-btn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  background-color: rgba(var(--primary-color), 0.1);
+}
+.quiz-option-btn.selected {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #ffffff;
 }
 
-/* Custom button styling */
-.btn-primary {
-  background: linear-gradient(
-    to right,
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  border: none;
-  transition: transform 0.2s;
+/* Modals */
+.modal-content {
+  background-color: var(--surface-color) !important;
+  border-color: var(--border-color) !important;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
+.modal-body .form-label,
+.modal-body .form-check-label {
+  color: var(--text-color) !important;
 }
 
-/* Custom card styling */
-.card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
+/* FIX: Tables (for Admin & Editor Dashboards) */
+.table {
+  color: var(--text-color); // Sets default text color for the table
+  border-color: var(--border-color);
+}
+.table > :not(caption) > * > * {
+  background-color: var(--surface-color) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color); // Explicitly set text color for cells
+}
+.table-hover > tbody > tr:hover > * {
+  color: var(--text-color) !important;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.075
+  ) !important; // A subtle hover for dark mode
+}
+th {
+  // Ensure table headers are the correct color
+  color: var(--text-color) !important;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+/* FIX: Nav Tabs (for Editor Dashboard) */
+.nav-tabs {
+  border-bottom-color: var(--border-color);
+}
+.nav-tabs .nav-link {
+  color: var(--text-muted-color);
+  border-color: transparent;
+}
+.nav-tabs .nav-link.active {
+  color: var(--text-color);
+  background-color: var(--surface-color);
+  border-color: var(--border-color) var(--border-color) var(--surface-color);
+}
+.nav-tabs .nav-link:hover {
+  border-color: var(--border-color);
 }

@@ -7,12 +7,19 @@ import {
   generateTfqWithAi,
 } from "../api/quizzes";
 import useAuth from "../hooks/useAuth";
-import "../assets/styles/AiGenerator.css";
+import "../assets/styles/AiGenerator.css"; // Re-use the same great style
+import Button from "../components/ui/Button";
 
 const QuizzesPage = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState([]);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [isLastPage, setIsLastPage] = useState(false);
+  const pageSize = 9;
 
   const [aiTopic, setAiTopic] = useState("");
   const [aiDifficulty, setAiDifficulty] = useState("Beginner");
@@ -23,21 +30,44 @@ const QuizzesPage = () => {
   const navigate = useNavigate();
 
   const fetchQuizzes = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      setError("");
-      const data = await getAllQuizzes();
+      const filter = { Tags: tags, pageNumber, pageSize };
+      const data = await getAllQuizzes(filter);
       setQuizzes(data);
+      setIsLastPage(data.length < pageSize);
     } catch (err) {
       setError("Failed to fetch quizzes. Please try again later.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tags, pageNumber]);
 
   useEffect(() => {
     fetchQuizzes();
   }, [fetchQuizzes]);
+
+  const handleTagInputChange = (e) => {
+    setTagInput(e.target.value);
+  };
+
+  const handleTagInputKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      const newTag = tagInput.trim();
+      if (newTag && !tags.includes(newTag)) {
+        setTags([...tags, newTag]);
+        setPageNumber(0);
+      }
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+    setPageNumber(0); // Reset to first page when a tag is removed
+  };
 
   const handleAiGenerate = async (generatorFunction, quizType) => {
     if (!aiTopic.trim()) {
@@ -50,11 +80,14 @@ const QuizzesPage = () => {
       const params = { topic: aiTopic, difficulty: aiDifficulty };
       const generatedQuiz = await generatorFunction(params);
 
-      navigate("/editor/dashboard", {
-        state: {
-          newQuiz: { ...generatedQuiz, type: quizType },
-          activeTab: "quizzes",
-        },
+      // FIX: Ensure tags is an array, not null
+      if (!generatedQuiz.tags) {
+        generatedQuiz.tags = [];
+      }
+
+      // FIX: Navigate directly to the newly generated quiz page
+      navigate(`/quizzes/${generatedQuiz.id}`, {
+        state: { quizType: generatedQuiz.type },
       });
     } catch (err) {
       setAiError("Failed to generate quiz. The AI may be busy.");
@@ -63,10 +96,9 @@ const QuizzesPage = () => {
     }
   };
 
-  if (loading) {
+  if (loading && quizzes.length === 0) {
     return <p className="text-center mt-5">Loading Quizzes...</p>;
   }
-
   if (error) {
     return <div className="alert alert-danger container mt-5">{error}</div>;
   }
@@ -126,7 +158,55 @@ const QuizzesPage = () => {
         </div>
       )}
 
+      <div className="card mb-4">
+        <div className="card-body">
+          <label htmlFor="tag-input" className="form-label">
+            Filter by Tags
+          </label>
+          <input
+            type="text"
+            id="tag-input"
+            className="form-control"
+            placeholder="Type a tag and press Enter..."
+            value={tagInput}
+            onChange={handleTagInputChange}
+            onKeyDown={handleTagInputKeyDown}
+          />
+          <div className="mt-2">
+            {tags.map((tag, index) => (
+              <span key={index} className="badge bg-primary me-2">
+                {tag}
+                <button
+                  type="button"
+                  className="btn-close btn-close-white ms-1"
+                  aria-label="Remove"
+                  onClick={() => removeTag(tag)}></button>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {loading && <p className="text-center">Loading quizzes...</p>}
+      {error && <div className="alert alert-danger">{error}</div>}
+
       <QuizList quizzes={quizzes} />
+
+      <div className="d-flex justify-content-center align-items-center mt-5">
+        <Button
+          onClick={() => setPageNumber((p) => Math.max(0, p - 1))}
+          disabled={pageNumber === 0 || loading}
+          className="me-2">
+          &larr; Previous
+        </Button>
+        <span className="mx-2 fs-5">Page {pageNumber + 1}</span>
+        <Button
+          onClick={() => setPageNumber((p) => p + 1)}
+          disabled={isLastPage || loading}
+          className="ms-2">
+          Next &rarr;
+        </Button>
+      </div>
     </div>
   );
 };

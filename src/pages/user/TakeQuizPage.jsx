@@ -59,7 +59,12 @@ const TakeQuizPage = () => {
     }
     setIsSubmitting(true);
     try {
-      const isCorrect = await checkAnswer(quizId, selectedAnswer, quiz.type);
+      const isCorrect = await checkAnswer(
+        quizId,
+        user.id,
+        selectedAnswer,
+        quiz.type
+      );
       setResult(isCorrect ? "correct" : "incorrect");
     } catch (err) {
       alert("Could not check the answer. Please try again.");
@@ -79,7 +84,12 @@ const TakeQuizPage = () => {
 
   return (
     <div className="container py-5">
-      <h1 className="mb-4">Take Quiz</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1>Take Quiz</h1>
+        <Button variant="secondary" onClick={() => navigate("/quizzes")}>
+          &larr; Back to Quiz List
+        </Button>
+      </div>
       <Card>
         <div className="card-body">
           <h4 className="card-title">{quiz.question}</h4>

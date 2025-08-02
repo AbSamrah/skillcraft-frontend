@@ -47,9 +47,10 @@ export const deleteRoadmap = async (id) => {
   }
 };
 
-export const generateRoadmapWithAi = async (topic) => {
+export const generateRoadmapWithAi = async (userId, topic) => {
   try {
     const response = await apiClient.post("/Roadmaps/ai", {
+      userId: userId,
       prompt: topic,
     });
     return response.data;

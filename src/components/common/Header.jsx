@@ -1,9 +1,11 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import useTheme from "../../hooks/useTheme";
 
 const Header = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -51,6 +53,11 @@ const Header = () => {
               </li>
             </ul>
             <div className="d-flex align-items-center">
+              <button
+                className="btn btn-outline-secondary me-2"
+                onClick={toggleTheme}>
+                {theme === "light" ? "🌙" : "☀️"}
+              </button>
               {user ? (
                 <div className="dropdown">
                   <button
@@ -64,7 +71,6 @@ const Header = () => {
                   <ul
                     className="dropdown-menu dropdown-menu-end"
                     aria-labelledby="userMenuButton">
-                    {/* FIX: Conditionally render dashboard link */}
                     {dashboardLink && (
                       <li>
                         <Link className="dropdown-item" to={dashboardLink}>
@@ -72,7 +78,6 @@ const Header = () => {
                         </Link>
                       </li>
                     )}
-                    {/* FIX: Conditionally render profile link */}
                     {user.role === "User" && (
                       <li>
                         <Link className="dropdown-item" to="/profile">
