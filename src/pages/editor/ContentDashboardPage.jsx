@@ -156,7 +156,6 @@ const ContentDashboardPage = () => {
     } else if (type === "quiz") {
       setEditingQuiz(item);
       setShowEditQuiz(true);
-      x;
     }
   };
 
