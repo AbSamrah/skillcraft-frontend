@@ -1,6 +1,9 @@
 # SkillCraft Frontend
 
 ![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![JavaScript](https://img.shields.io/badge/JavaScript-informational?style=for-the-badge&logo=javascript)
+![Bootstrp css](https://img.shields.io/badge/Bootstrp_CSS-3.0.2-38B2AC.svg?style=for-the-badge&logo=bootstrap-css)
+
 
 This is the official frontend repository for the SkillCraft platform, a website for learning new skills through guided roadmaps. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
