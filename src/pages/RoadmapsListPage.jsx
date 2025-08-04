@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { getAllRoadmaps, generateRoadmapWithAi } from "../api/roadmaps";
+import RoadmapList from "../components/roadmaps/RoadmapList"; // Import the RoadmapList component
 import "../assets/styles/AiGenerator.css";
 import useDebounce from "../hooks/useDebounce";
 
@@ -17,14 +17,14 @@ const RoadmapsListPage = () => {
   const [isLastPage, setIsLastPage] = useState(false);
   const pageSize = 9;
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   const [aiTopic, setAiTopic] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
 
   const { user } = useAuth();
   const navigate = useNavigate();
-
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const fetchRoadmaps = useCallback(async () => {
     setLoading(true);
@@ -59,7 +59,7 @@ const RoadmapsListPage = () => {
     setAiLoading(true);
     setAiError("");
     try {
-      const generatedRoadmap = await generateRoadmapWithAi(user.id, aiTopic);
+      const generatedRoadmap = await generateRoadmapWithAi({ topic: aiTopic });
       navigate(`/roadmaps/${generatedRoadmap.id}`);
     } catch (err) {
       setAiError(
@@ -70,14 +70,6 @@ const RoadmapsListPage = () => {
       setAiLoading(false);
     }
   };
-
-  if (loading && roadmaps.length === 0) {
-    return <p className="text-center mt-5">Loading roadmaps...</p>;
-  }
-
-  if (error) {
-    return <div className="alert alert-danger container mt-5">{error}</div>;
-  }
 
   return (
     <div className="container py-5">
@@ -126,29 +118,8 @@ const RoadmapsListPage = () => {
 
       {loading && <p className="text-center">Searching...</p>}
 
-      <div className="row g-4">
-        {!loading && roadmaps.length === 0 && (
-          <p className="text-center text-muted">No roadmaps found.</p>
-        )}
-        {roadmaps.map((roadmap) => (
-          <div className="col-md-6 col-lg-4" key={roadmap.id}>
-            <Link
-              to={`/roadmaps/${roadmap.id}`}
-              className="text-decoration-none">
-              <Card>
-                <h5 className="card-title">{roadmap.name}</h5>
-                <div>
-                  {roadmap.tags?.map((tag) => (
-                    <span key={tag} className="badge bg-secondary me-1">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </Card>
-            </Link>
-          </div>
-        ))}
-      </div>
+      {!loading && error && <div className="alert alert-danger">{error}</div>}
+      {!loading && !error && <RoadmapList roadmaps={roadmaps} />}
 
       <div className="d-flex justify-content-center align-items-center mt-5">
         <Button

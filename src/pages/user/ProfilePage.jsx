@@ -19,7 +19,7 @@ const ProfilePage = () => {
     setLoading(true);
     try {
       const [profileRoadmaps, allRoadmaps] = await Promise.all([
-        getProfileRoadmaps(user.id),
+        getProfileRoadmaps(),
         getAllRoadmaps(),
       ]);
       const roadmapDetails = profileRoadmaps.map((profileRoadmap) => {
@@ -41,8 +41,8 @@ const ProfilePage = () => {
   const handleRemoveRoadmap = async (roadmapId) => {
     if (window.confirm("Are you sure you want to remove this roadmap?")) {
       try {
-        await removeRoadmapFromProfile(user.id, roadmapId);
-        fetchMyRoadmaps(); // Refresh the list
+        await removeRoadmapFromProfile(roadmapId);
+        fetchMyRoadmaps();
       } catch (error) {
         console.error("Failed to remove roadmap:", error);
         alert("Could not remove roadmap.");

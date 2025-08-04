@@ -38,6 +38,7 @@ const ContentDashboardPage = () => {
     roadmaps: { name: "", pageNumber: 0, pageSize: 10 },
     milestones: { name: "", pageNumber: 0, pageSize: 10 },
     steps: { name: "", pageNumber: 0, pageSize: 10 },
+    quizzes: { name: "", pageNumber: 0, pageSize: 10 },
   });
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,7 +69,7 @@ const ContentDashboardPage = () => {
           getAllRoadmaps(filters.roadmaps),
           getAllMilestones(filters.milestones),
           getAllSteps(filters.steps),
-          getAllQuizzes(),
+          getAllQuizzes(filters.quizzes),
         ]);
 
       setData({
@@ -82,6 +83,7 @@ const ContentDashboardPage = () => {
         roadmaps: roadmapsRes.length < filters.roadmaps.pageSize,
         milestones: milestonesRes.length < filters.milestones.pageSize,
         steps: stepsRes.length < filters.steps.pageSize,
+        quizzes: quizzesRes.length < filters.quizzes.pageSize,
       });
     } catch (error) {
       setError("Failed to fetch content. Please try again.");
@@ -190,7 +192,8 @@ const ContentDashboardPage = () => {
   };
 
   const renderSearchAndPagination = () => {
-    if (!["roadmaps", "milestones", "steps"].includes(activeTab)) return null;
+    if (!["roadmaps", "milestones", "steps", "quizzes"].includes(activeTab))
+      return null;
 
     return (
       <div className="mb-4">

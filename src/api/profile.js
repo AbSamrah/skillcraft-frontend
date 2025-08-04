@@ -1,46 +1,40 @@
 import apiClient from "./apiClient";
 
-export const getProfileRoadmaps = async (userId) => {
-  const response = await apiClient.get(`/Profile/${userId}/AllRoadmaps`);
+export const getProfileRoadmaps = async () => {
+  const response = await apiClient.get(`/Profile/MyRoadmaps`);
   return response.data;
 };
 
-export const addRoadmapToProfile = async (userId, roadmapId) => {
-  await apiClient.put(`/Profile/${userId}/AddRoadmap/${roadmapId}`);
+export const addRoadmapToProfile = async (roadmapId) => {
+  await apiClient.put(`/Profile/AddRoadmap/${roadmapId}`);
 };
 
-export const removeRoadmapFromProfile = async (userId, roadmapId) => {
-  await apiClient.put(`/Profile/${userId}/RemoveRoadmap/${roadmapId}`);
+export const removeRoadmapFromProfile = async (roadmapId) => {
+  await apiClient.put(`/Profile/RemoveRoadmap/${roadmapId}`);
 };
 
-export const getFinishedSteps = async (userId, roadmapId) => {
-  const response = await apiClient.get(
-    `/Profile/${userId}/FinishedSteps/${roadmapId}`
-  );
+export const getFinishedSteps = async (roadmapId) => {
+  const response = await apiClient.get(`/Profile/FinishedSteps/${roadmapId}`);
   return response.data;
 };
 
-export const finishSteps = async (userId, stepIds) => {
-  await apiClient.put(`/Profile/${userId}/FinishSteps`, stepIds, {
+export const finishSteps = async (stepIds) => {
+  await apiClient.put(`/Profile/FinishSteps`, stepIds, {
     headers: { "Content-Type": "application/json" },
   });
 };
 
-export const unfinishSteps = async (userId, stepIds) => {
-  await apiClient.put(`/Profile/${userId}/UnFinishSteps`, stepIds, {
+export const unfinishSteps = async (stepIds) => {
+  await apiClient.put(`/Profile/UnFinishSteps`, stepIds, {
     headers: { "Content-Type": "application/json" },
   });
 };
 
-export const setRoadmapStatus = async (userId, roadmapId, isFinished) => {
-  await apiClient.put(
-    `/Profile/${userId}/Roadmaps/${roadmapId}?finish=${isFinished}`
-  );
+export const setRoadmapStatus = async (roadmapId, isFinished) => {
+  await apiClient.put(`/Profile/Roadmaps/${roadmapId}?finish=${isFinished}`);
 };
 
-export const checkRoadmapInProfile = async (userId, roadmapId) => {
-  const response = await apiClient.get(
-    `/Profile/${userId}/CheckRoadmap/${roadmapId}`
-  );
+export const checkRoadmapInProfile = async (roadmapId) => {
+  const response = await apiClient.get(`/Profile/CheckRoadmap/${roadmapId}`);
   return response.data;
 };

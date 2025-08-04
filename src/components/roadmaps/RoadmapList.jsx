@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
+import { Link } from "react-router-dom";
 import Card from "../ui/Card";
-import Button from "../ui/Button";
-import { getAllRoadmaps, generateRoadmapWithAi } from "../../api/roadmaps";
+import { getAllRoadmaps } from "../../api/roadmaps";
 import "../../assets/styles/AiInput.css";
 
 const RoadmapList = () => {
@@ -11,12 +9,6 @@ const RoadmapList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [aiTopic, setAiTopic] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState("");
-
-  const { user } = useAuth();
-  const navigate = useNavigate();
   useEffect(() => {
     const fetchRoadmaps = async () => {
       try {
@@ -32,25 +24,6 @@ const RoadmapList = () => {
     fetchRoadmaps();
   }, []);
 
-  const handleAiGenerate = async (e) => {
-    e.preventDefault();
-    if (!aiTopic.trim()) {
-      setAiError("Please enter a topic.");
-      return;
-    }
-    setAiLoading(true);
-    setAiError("");
-    try {
-      const generatedRoadmap = await generateRoadmapWithAi(aiTopic);
-      navigate("/editor/roadmaps/new", { state: { generatedRoadmap } });
-    } catch (err) {
-      setAiError("Failed to generate roadmap. Please try again.");
-      console.error(err);
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
   if (loading) {
     return <div className="text-center">Loading roadmaps...</div>;
   }
@@ -61,31 +34,6 @@ const RoadmapList = () => {
 
   return (
     <div className="container py-5">
-      <h1 className="text-center mb-4">Explore Roadmaps</h1>
-      {user && (
-        <div className="ai-input-container">
-          <form onSubmit={handleAiGenerate}>
-            <div className="ai-input-group">
-              <input
-                type="text"
-                className="ai-input-field"
-                placeholder="Enter a skill you want to learn... (e.g., 'Advanced TypeScript')"
-                value={aiTopic}
-                onChange={(e) => setAiTopic(e.target.value)}
-                disabled={aiLoading}
-              />
-              <Button
-                type="submit"
-                className="ai-generate-btn"
-                disabled={aiLoading}>
-                {aiLoading ? "Generating..." : "✨ Generate with AI"}
-              </Button>
-            </div>
-            {aiError && <div className="text-danger mt-2">{aiError}</div>}
-          </form>
-        </div>
-      )}
-
       <div className="row g-4">
         {roadmaps.map((roadmap) => (
           <div className="col-md-6 col-lg-4" key={roadmap.id}>

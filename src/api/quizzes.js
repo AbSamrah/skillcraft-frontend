@@ -69,12 +69,12 @@ export const deleteQuiz = async (id) => {
   }
 };
 
-export const checkAnswer = async (id, userId, answer, type) => {
+export const checkAnswer = async (id, answer, type) => {
   try {
     const endpoint =
       type === "MultipleChoices" ? `mcq/answer/${id}` : `tfq/answer/${id}`;
     const response = await apiClient.get(`/Quizzes/${endpoint}`, {
-      params: { userId, answer },
+      params: { answer },
     });
     return response.data;
   } catch (error) {

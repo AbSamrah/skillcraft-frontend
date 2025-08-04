@@ -59,12 +59,7 @@ const TakeQuizPage = () => {
     }
     setIsSubmitting(true);
     try {
-      const isCorrect = await checkAnswer(
-        quizId,
-        user.id,
-        selectedAnswer,
-        quiz.type
-      );
+      const isCorrect = await checkAnswer(quizId, selectedAnswer, quiz.type);
       setResult(isCorrect ? "correct" : "incorrect");
     } catch (err) {
       alert("Could not check the answer. Please try again.");

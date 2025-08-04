@@ -15,9 +15,10 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const filter = { pageSize: 3 };
         const [roadmapsData, quizzesData] = await Promise.all([
-          getAllRoadmaps(),
-          getAllQuizzes(),
+          getAllRoadmaps(filter),
+          getAllQuizzes(filter),
         ]);
         setRoadmaps(roadmapsData.slice(0, 3));
         setQuizzes(quizzesData.slice(0, 3));
@@ -58,6 +59,14 @@ const HomePage = () => {
                     <Card className="h-100">
                       <div className="card-body">
                         <h5 className="card-title">{roadmap.name}</h5>
+                        <p className="card-text">
+                          Tags:{" "}
+                          {roadmap.tags.map((tag) => (
+                            <span key={tag} className="badge bg-secondary ms-1">
+                              {tag}
+                            </span>
+                          ))}
+                        </p>
                         <Link to={`/roadmaps/${roadmap.id}`}>
                           <Button>View Roadmap</Button>
                         </Link>
@@ -85,7 +94,22 @@ const HomePage = () => {
                     <Card className="h-100">
                       <div className="card-body">
                         <h5 className="card-title">{quiz.question}</h5>
-                        <p className="card-text">Category: {quiz.tag}</p>
+                        <p className="card-text">
+                          Tags:{" "}
+                          <span
+                            className={`badge bg-${
+                              quiz.type === "MultipleChoices"
+                                ? "primary"
+                                : "success"
+                            }`}>
+                            {quiz.type === "MultipleChoices" ? "MCQ" : "T/F"}
+                          </span>
+                          {quiz.tags.map((tag) => (
+                            <span key={tag} className="badge bg-secondary ms-1">
+                              {tag}
+                            </span>
+                          ))}
+                        </p>
                         <Link to={`/quizzes/${quiz.id}`}>
                           <Button>Take Quiz</Button>
                         </Link>
