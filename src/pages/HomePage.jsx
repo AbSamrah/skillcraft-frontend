@@ -61,8 +61,10 @@ const HomePage = () => {
                         <h5 className="card-title">{roadmap.name}</h5>
                         <p className="card-text">
                           Tags:{" "}
-                          {roadmap.tags.map((tag) => (
-                            <span key={tag} className="badge bg-secondary ms-1">
+                          {roadmap.tags.slice(0, 2).map((tag, index) => (
+                            <span
+                              key={index}
+                              className="badge bg-secondary me-1">
                               {tag}
                             </span>
                           ))}
@@ -103,9 +105,11 @@ const HomePage = () => {
                                 : "success"
                             }`}>
                             {quiz.type === "MultipleChoices" ? "MCQ" : "T/F"}
-                          </span>
-                          {quiz.tags.map((tag) => (
-                            <span key={tag} className="badge bg-secondary ms-1">
+                          </span>{" "}
+                          {quiz.tags.slice(0, 3).map((tag, index) => (
+                            <span
+                              key={index}
+                              className="badge bg-secondary me-1">
                               {tag}
                             </span>
                           ))}

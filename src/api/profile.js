@@ -38,3 +38,8 @@ export const checkRoadmapInProfile = async (roadmapId) => {
   const response = await apiClient.get(`/Profile/CheckRoadmap/${roadmapId}`);
   return response.data;
 };
+
+export const getUserEnergy = async (id) => {
+  const response = await apiClient.get(`/Profile/energy/${id}`);
+  return response.data;
+};

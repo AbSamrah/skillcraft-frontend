@@ -77,8 +77,8 @@ const RoadmapDetail = () => {
 
       if (user && user.role === "User") {
         const [inProfile, finishedStepsData] = await Promise.all([
-          checkRoadmapInProfile(user.id, roadmapId),
-          getFinishedSteps(user.id, roadmapId),
+          checkRoadmapInProfile(roadmapId),
+          getFinishedSteps(roadmapId),
         ]);
 
         setIsInProfile(inProfile);
@@ -101,7 +101,7 @@ const RoadmapDetail = () => {
     if (!user) return;
     const action = isInProfile ? removeRoadmapFromProfile : addRoadmapToProfile;
     try {
-      await action(user.id, roadmapId);
+      await action(roadmapId);
       setIsInProfile(!isInProfile);
       alert(
         `Roadmap ${isInProfile ? "removed from" : "added to"} your profile!`
@@ -132,8 +132,8 @@ const RoadmapDetail = () => {
 
     try {
       await Promise.all([
-        stepsToFinish.length > 0 && finishSteps(user.id, stepsToFinish),
-        stepsToUnfinish.length > 0 && unfinishSteps(user.id, stepsToUnfinish),
+        stepsToFinish.length > 0 && finishSteps(stepsToFinish),
+        stepsToUnfinish.length > 0 && unfinishSteps(stepsToUnfinish),
       ]);
       setFinishedSteps(selectedSteps);
       alert("Your progress has been updated!");

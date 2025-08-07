@@ -4,7 +4,7 @@ import useAuth from "../../hooks/useAuth";
 import useTheme from "../../hooks/useTheme";
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, energy } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -59,42 +59,55 @@ const Header = () => {
                 {theme === "light" ? "🌙" : "☀️"}
               </button>
               {user ? (
-                <div className="dropdown">
-                  <button
-                    className="btn btn-primary dropdown-toggle"
-                    type="button"
-                    id="userMenuButton"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    Welcome, {user.firstName} {user.lastName}
-                  </button>
-                  <ul
-                    className="dropdown-menu dropdown-menu-end"
-                    aria-labelledby="userMenuButton">
-                    {dashboardLink && (
-                      <li>
-                        <Link className="dropdown-item" to={dashboardLink}>
-                          My Dashboard
-                        </Link>
-                      </li>
-                    )}
-                    {user.role === "User" && (
-                      <li>
-                        <Link className="dropdown-item" to="/profile">
-                          My Profile
-                        </Link>
-                      </li>
-                    )}
-                    <li>
-                      <hr className="dropdown-divider" />
+                <>
+                  {user.role === "User" && energy !== null && (
+                    <li className="nav-item">
+                      <span className="nav-link pe-none">
+                        <span className="badge bg-primary">
+                          ⚡ {energy} Energy
+                        </span>
+                      </span>
                     </li>
-                    <li>
-                      <button className="dropdown-item" onClick={handleLogout}>
-                        Logout
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                  )}
+                  <div className="dropdown">
+                    <button
+                      className="btn btn-primary dropdown-toggle"
+                      type="button"
+                      id="userMenuButton"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false">
+                      Welcome, {user.firstName} {user.lastName}
+                    </button>
+                    <ul
+                      className="dropdown-menu dropdown-menu-end"
+                      aria-labelledby="userMenuButton">
+                      {dashboardLink && (
+                        <li>
+                          <Link className="dropdown-item" to={dashboardLink}>
+                            My Dashboard
+                          </Link>
+                        </li>
+                      )}
+                      {user.role === "User" && (
+                        <li>
+                          <Link className="dropdown-item" to="/profile">
+                            My Profile
+                          </Link>
+                        </li>
+                      )}
+                      <li>
+                        <hr className="dropdown-divider" />
+                      </li>
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={handleLogout}>
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </>
               ) : (
                 <>
                   <Link to="/login" className="btn btn-outline-primary me-2">

@@ -1,59 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import Card from "../ui/Card";
-import { getAllRoadmaps } from "../../api/roadmaps";
-import "../../assets/styles/AiInput.css";
+import Button from "../ui/Button";
 
-const RoadmapList = () => {
-  const [roadmaps, setRoadmaps] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// The component now accepts `roadmaps` as a prop.
+const RoadmapList = ({ roadmaps }) => {
+  // Removed the local state (useState) and data fetching (useEffect).
 
-  useEffect(() => {
-    const fetchRoadmaps = async () => {
-      try {
-        const data = await getAllRoadmaps();
-        setRoadmaps(data);
-      } catch (err) {
-        setError("Could not fetch roadmaps.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRoadmaps();
-  }, []);
-
-  if (loading) {
-    return <div className="text-center">Loading roadmaps...</div>;
-  }
-
-  if (error) {
-    return <div className="alert alert-danger">{error}</div>;
+  // A check for empty or undefined roadmaps array can be useful.
+  if (!roadmaps || roadmaps.length === 0) {
+    return <p className="text-center">No roadmaps found.</p>;
   }
 
   return (
-    <div className="container py-5">
-      <div className="row g-4">
-        {roadmaps.map((roadmap) => (
-          <div className="col-md-6 col-lg-4" key={roadmap.id}>
-            <Link
-              to={`/roadmaps/${roadmap.id}`}
-              className="text-decoration-none">
-              <Card>
-                <h5 className="card-title">{roadmap.name}</h5>
-                <div>
-                  {roadmap.tags?.map((tag) => (
-                    <span key={tag} className="badge bg-secondary me-1">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </Card>
-            </Link>
-          </div>
-        ))}
-      </div>
+    // The container div was removed to prevent double-nesting inside the parent page.
+    <div className="row g-4">
+      {roadmaps.map((roadmap) => (
+        <div className="col-md-6 col-lg-4" key={roadmap.id}>
+          <Card className="h-100">
+            <div className="card-body d-flex flex-column">
+              <h5 className="card-title">{roadmap.name}</h5>
+              <div className="mb-2">
+                {roadmap.tags?.slice(0, 3).map((tag, index) => (
+                  <span key={index} className="badge bg-secondary me-1">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-auto">
+                <Link to={`/roadmaps/${roadmap.id}`}>
+                  <Button>View Roadmap</Button>
+                </Link>
+              </div>
+            </div>
+          </Card>
+        </div>
+      ))}
     </div>
   );
 };

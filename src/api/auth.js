@@ -33,3 +33,14 @@ export const changePassword = async (passwordData) => {
 export const logout = () => {
   localStorage.removeItem("authToken");
 };
+
+export const verifyEmail = async (email, token) => {
+  try {
+    const response = await apiClient.get("/Auth/verify-email", {
+      params: { email, token },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

@@ -11,6 +11,7 @@
     "bootstrap": "^5.3.7",
     "jwt-decode": "^4.0.0",
     "react": "^19.1.0",
+    "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.0",
     "react-scripts": "5.0.1",

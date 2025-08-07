@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/admin/DashboardPage";
 import UserManagement from "./pages/admin/UserManagementPage";
 import EditorDashboard from "./pages/editor/ContentDashboardPage";
 import RoadmapEditor from "./pages/editor/RoadmapEditorPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 const DashboardRedirect = () => {
   const { user, loading } = useAuth();
@@ -52,6 +53,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/roadmaps" element={<RoadmapsListPage />} />
             <Route path="/roadmaps/:id" element={<RoadmapPage />} />
             <Route path="/quizzes" element={<QuizzesPage />} />
