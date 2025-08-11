@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import Button from "../../components/ui/Button";
 import { getAllUsers, deleteUser, updateUser } from "../../api/users";
 import { getAllRoles } from "../../api/roles";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
   const [formData, setFormData] = useState({ role: "" });
@@ -127,16 +131,28 @@ const UserManagementPage = () => {
     setShowEditModal(true);
   };
 
-  const handleDelete = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await deleteUser(userId);
-        fetchUsers();
-      } catch (error) {
-        console.error("Failed to delete user:", error);
-        alert("Could not delete user.");
+  const handleDelete = (userId, userEmail) => {
+    MySwal.fire({
+      title: "Are you sure?",
+      text: `You are about to delete the user: ${userEmail}. You won't be able to revert this!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteUser(userId)
+          .then(() => {
+            fetchUsers();
+            MySwal.fire("Deleted!", "The user has been deleted.", "success");
+          })
+          .catch((error) => {
+            console.error("Failed to delete user:", error);
+            MySwal.fire("Error!", "Failed to delete the user.", "error");
+          });
       }
-    }
+    });
   };
 
   const handleUserUpdated = () => {
@@ -191,7 +207,7 @@ const UserManagementPage = () => {
                         Edit
                       </Button>
                       <Button
-                        onClick={() => handleDelete(user.id)}
+                        onClick={() => handleDelete(user.id, user.email)}
                         variant="outline-danger"
                         size="sm">
                         Delete

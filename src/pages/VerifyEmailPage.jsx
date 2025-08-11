@@ -9,19 +9,17 @@ const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [status, setStatus] = useState("verifying"); // 'verifying', 'success', 'error'
+  const [status, setStatus] = useState("verifying");
   const [message, setMessage] = useState(
     "Verifying your email, please wait..."
   );
 
+  const email = searchParams.get("email");
+  const token = searchParams.get("token");
+
   useEffect(() => {
     const handleVerification = async () => {
-      const email = searchParams.get("email");
-      const token = searchParams.get("token");
-
       if (!email || !token) {
-        setStatus("error");
-        setMessage("Invalid verification link. Missing parameters.");
         return;
       }
 
@@ -35,7 +33,6 @@ const VerifyEmailPage = () => {
 
         if (response.token) {
           login(response.token);
-          // Redirect to dashboard after a short delay on success
           setTimeout(() => {
             navigate("/dashboard");
           }, 2000);
@@ -50,7 +47,7 @@ const VerifyEmailPage = () => {
     };
 
     handleVerification();
-  }, [searchParams, login, navigate]); // Dependencies for the effect
+  }, [email, token, login, navigate]);
 
   const getStatusIcon = () => {
     if (status === "success") {
@@ -86,10 +83,10 @@ const VerifyEmailPage = () => {
             </h3>
             <p className="lead text-muted mt-2">{message}</p>
             {status !== "verifying" && (
-              <Link to={status === "success" ? "/dashboard" : "/signup"}>
+              <Link to={status === "success" ? "/profile" : "/signup"}>
                 <Button variant="primary" className="mt-3">
                   {status === "success"
-                    ? "Go to Dashboard"
+                    ? "Go to your profile"
                     : "Return to Sign Up"}
                 </Button>
               </Link>

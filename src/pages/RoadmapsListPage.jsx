@@ -59,7 +59,7 @@ const RoadmapsListPage = () => {
     setAiLoading(true);
     setAiError("");
     try {
-      const generatedRoadmap = await generateRoadmapWithAi({ topic: aiTopic });
+      const generatedRoadmap = await generateRoadmapWithAi(aiTopic);
       navigate(`/roadmaps/${generatedRoadmap.id}`);
     } catch (err) {
       setAiError(

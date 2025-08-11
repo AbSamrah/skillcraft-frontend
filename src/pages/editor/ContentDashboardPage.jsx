@@ -15,6 +15,10 @@ import {
   CreateQuizModal,
   EditQuizModal,
 } from "../../components/quizzes/QuizModals";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 const truncateText = (text, maxLength) => {
   if (!text) return "";
@@ -121,30 +125,45 @@ const ContentDashboardPage = () => {
     }));
   };
 
-  const handleDelete = async (type, id) => {
-    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
-      try {
-        switch (type) {
-          case "roadmap":
-            await deleteRoadmap(id);
-            break;
-          case "milestone":
-            await deleteMilestone(id);
-            break;
-          case "step":
-            await deleteStep(id);
-            break;
-          case "quiz":
-            await deleteQuiz(id);
-            break;
-          default:
-            return;
+  const handleDelete = (type, id, name) => {
+    MySwal.fire({
+      title: "Are you sure?",
+      text: `You are about to delete the ${type}: "${name}". You won't be able to revert this!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          let deletePromise;
+          switch (type) {
+            case "roadmap":
+              deletePromise = deleteRoadmap(id);
+              break;
+            case "quiz":
+              deletePromise = deleteQuiz(id);
+              break;
+            case "milestone":
+              deletePromise = deleteMilestone(id);
+              break;
+            case "step":
+              deletePromise = deleteStep(id);
+              break;
+
+            default:
+              return;
+          }
+          await deletePromise;
+          fetchData(); // Refresh data
+          MySwal.fire("Deleted!", `The ${type} has been deleted.`, "success");
+        } catch (error) {
+          console.error(`Failed to delete ${type}:`, error);
+          MySwal.fire("Error!", `Failed to delete the ${type}.`, "error");
         }
-        fetchData();
-      } catch (err) {
-        setError(`Failed to delete ${type}.`);
       }
-    }
+    });
   };
 
   const handleEdit = (item, type) => {
@@ -249,8 +268,8 @@ const ContentDashboardPage = () => {
                   Edit
                 </Button>
                 <Button
-                  onClick={() => handleDelete("roadmap", item.id)}
-                  className="btn btn-sm btn-outline-danger">
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => handleDelete("roadmap", item.id, item.name)}>
                   Delete
                 </Button>
               </td>
@@ -283,8 +302,8 @@ const ContentDashboardPage = () => {
                   Edit
                 </Button>
                 <Button
-                  onClick={() => handleDelete("milestone", item.id)}
-                  className="btn btn-sm btn-outline-danger">
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => handleDelete("quiz", item.id, item.name)}>
                   Delete
                 </Button>
               </td>
@@ -317,8 +336,8 @@ const ContentDashboardPage = () => {
                   Edit
                 </Button>
                 <Button
-                  onClick={() => handleDelete("step", item.id)}
-                  className="btn btn-sm btn-outline-danger">
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => handleDelete("quiz", item.id, item.name)}>
                   Delete
                 </Button>
               </td>
@@ -352,7 +371,7 @@ const ContentDashboardPage = () => {
                 </Button>
                 <Button
                   className="btn btn-sm btn-outline-danger"
-                  onClick={() => handleDelete("quiz", quiz.id)}>
+                  onClick={() => handleDelete("quiz", quiz.id, quiz.question)}>
                   Delete
                 </Button>
               </td>

@@ -10,10 +10,10 @@ const SignupPage = () => {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: "", // State for the confirmation password
+    confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [message, setMessage] = useState(""); // For success messages
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
