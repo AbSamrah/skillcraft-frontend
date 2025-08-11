@@ -1,32 +1,47 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Button from "../../components/ui/Button";
-import { getAllUsers, deleteUser, updateUser } from "../../api/users";
+import { getAllUsers, deleteUser, updateUser, addUser } from "../../api/users";
 import { getAllRoles } from "../../api/roles";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
 
-const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
-  const [formData, setFormData] = useState({ role: "" });
+// --- Add User Modal Component ---
+const AddUserModal = ({ show, handleClose, onUserAdded }) => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    role: "User",
+  });
   const [roles, setRoles] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (show && user) {
+    if (show) {
       const fetchRoles = async () => {
-        const availableRoles = await getAllRoles();
-        setRoles(availableRoles);
+        try {
+          const availableRoles = await getAllRoles();
+          setRoles(availableRoles);
+        } catch (err) {
+          console.error("Failed to fetch roles:", err);
+        }
       };
       fetchRoles();
+      // Reset form when modal opens
       setFormData({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        role: "User",
       });
+      setError("");
     }
-  }, [user, show]);
+  }, [show]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -34,12 +49,17 @@ const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
     try {
-      await updateUser(formData.id, formData);
-      onUserUpdated();
-      handleClose();
-    } catch (error) {
-      console.error("Failed to update user:", error);
+      await addUser(formData);
+      onUserAdded(); // Refresh the user list
+      handleClose(); // Close the modal
+      MySwal.fire("Success!", "User has been created successfully.", "success");
+    } catch (err) {
+      setError(err.message || "Failed to create user.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,9 +73,7 @@ const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">
-              Edit User: {user.firstName} {user.lastName}
-            </h5>
+            <h5 className="modal-title">Add New User</h5>
             <button
               type="button"
               className="btn-close"
@@ -63,13 +81,46 @@ const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
           </div>
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
+              {error && <div className="alert alert-danger">{error}</div>}
+              <div className="mb-3">
+                <label>First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  className="form-control"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label>Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  className="form-control"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
               <div className="mb-3">
                 <label>Email</label>
                 <input
                   type="email"
+                  name="email"
                   className="form-control"
-                  value={formData.email}
-                  disabled
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label>Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  className="form-control"
+                  minLength="8"
+                  onChange={handleChange}
+                  required
                 />
               </div>
               <div className="mb-3">
@@ -94,8 +145,8 @@ const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
               <Button type="button" variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button type="submit" variant="primary">
-                Save Changes
+              <Button type="submit" variant="primary" disabled={loading}>
+                {loading ? "Adding..." : "Add User"}
               </Button>
             </div>
           </form>
@@ -105,13 +156,139 @@ const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
   );
 };
 
+// --- Edit User Modal Component ---
+const EditUserModal = ({ show, handleClose, user, onUserUpdated }) => {
+  const [formData, setFormData] = useState({});
+  const [roles, setRoles] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (show && user) {
+      const fetchRoles = async () => {
+        try {
+          const availableRoles = await getAllRoles();
+          setRoles(availableRoles);
+        } catch (err) {
+          console.error("Failed to fetch roles:", err);
+        }
+      };
+      fetchRoles();
+      setFormData({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      });
+      setError("");
+    }
+  }, [user, show]);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await updateUser(formData.id, formData);
+      onUserUpdated();
+      handleClose();
+      MySwal.fire("Success!", "User has been updated successfully.", "success");
+    } catch (err) {
+      setError(err.message || "Failed to update user.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!show) return null;
+
+  return (
+    <div
+      className="modal show d-block"
+      tabIndex="-1"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">
+              Edit User: {user.firstName} {user.lastName}
+            </h5>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={handleClose}></button>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="modal-body">
+              {error && <div className="alert alert-danger">{error}</div>}
+              <div className="mb-3">
+                <label>First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  className="form-control"
+                  value={formData.firstName || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label>Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  className="form-control"
+                  value={formData.lastName || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="role" className="form-label">
+                  Role
+                </label>
+                <select
+                  className="form-select"
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.name}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <Button type="button" variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button type="submit" variant="primary" disabled={loading}>
+                {loading ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Main Page Component ---
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const data = await getAllUsers();
       setUsers(data);
@@ -120,11 +297,11 @@ const UserManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   const handleEdit = (user) => {
     setEditingUser(user);
@@ -166,7 +343,9 @@ const UserManagementPage = () => {
       <div className="container py-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1>User Management</h1>
-          <Button variant="primary">Add User</Button>
+          <Button variant="primary" onClick={() => setShowAddModal(true)}>
+            Add User
+          </Button>
         </div>
         <div className="card">
           <div className="table-responsive">
@@ -225,6 +404,11 @@ const UserManagementPage = () => {
         handleClose={() => setShowEditModal(false)}
         user={editingUser}
         onUserUpdated={handleUserUpdated}
+      />
+      <AddUserModal
+        show={showAddModal}
+        handleClose={() => setShowAddModal(false)}
+        onUserAdded={fetchUsers}
       />
     </>
   );

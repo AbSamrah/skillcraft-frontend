@@ -23,7 +23,7 @@ const RoadmapsListPage = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
 
-  const { user } = useAuth();
+  const { user, refreshEnergy } = useAuth();
   const navigate = useNavigate();
 
   const fetchRoadmaps = useCallback(async () => {
@@ -60,6 +60,7 @@ const RoadmapsListPage = () => {
     setAiError("");
     try {
       const generatedRoadmap = await generateRoadmapWithAi(aiTopic);
+      refreshEnergy(user.id);
       navigate(`/roadmaps/${generatedRoadmap.id}`);
     } catch (err) {
       setAiError(

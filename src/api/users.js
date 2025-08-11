@@ -27,9 +27,9 @@ export const addUser = async (userData) => {
   }
 };
 
-export const updateUser = async (userData) => {
+export const updateUser = async (id, userData) => {
   try {
-    const response = await apiClient.put(`/Users/${userData.id}`, userData);
+    const response = await apiClient.put(`/Users/${id}`, userData);
     return response.data;
   } catch (error) {
     throw error.response.data;

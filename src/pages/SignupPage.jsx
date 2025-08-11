@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { signup as apiSignup } from "../api/auth";
+import Swal from "sweetalert2"; // 1. Import SweetAlert2
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +17,6 @@ const SignupPage = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -24,7 +27,6 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setMessage("");
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
@@ -36,16 +38,15 @@ const SignupPage = () => {
       const { confirmPassword, ...signupData } = formData;
       const response = await apiSignup(signupData);
 
-      setMessage(
-        response.message ||
-          "Registration successful! Please check your email to verify your account."
-      );
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+      // 2. Replace the old alert with a modern Swal pop-up
+      MySwal.fire({
+        title: "Success!",
+        text:
+          response.message ||
+          "Registration successful! Please check your email to verify your account.",
+        icon: "success",
+        timer: 3000, // Automatically close after 3 seconds
+        showConfirmButton: false,
       });
 
       setTimeout(() => {
@@ -68,7 +69,6 @@ const SignupPage = () => {
           <h3 className="card-title text-center mb-4">Create Your Account</h3>
           <form onSubmit={handleSubmit}>
             {error && <div className="alert alert-danger">{error}</div>}
-            {message && <div className="alert alert-success">{message}</div>}
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label htmlFor="firstName" className="form-label">
@@ -124,7 +124,6 @@ const SignupPage = () => {
                 required
               />
             </div>
-            {/* New Confirm Password Field */}
             <div className="mb-3">
               <label htmlFor="confirmPassword" className="form-label">
                 Confirm Password

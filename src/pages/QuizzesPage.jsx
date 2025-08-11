@@ -26,7 +26,7 @@ const QuizzesPage = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
 
-  const { user } = useAuth();
+  const { user, refreshEnergy } = useAuth();
   const navigate = useNavigate();
 
   const fetchQuizzes = useCallback(async () => {
@@ -87,6 +87,7 @@ const QuizzesPage = () => {
       navigate(`/quizzes/${generatedQuiz.id}`, {
         state: { quizType: generatedQuiz.type },
       });
+      refreshEnergy(user.id);
     } catch (err) {
       setAiError("Failed to generate quiz. The AI may be busy.");
     } finally {

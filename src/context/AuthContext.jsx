@@ -7,7 +7,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [energy, setEnergy] = useState(null);
+  const [energy, setEnergy] = useState(100);
 
   const refreshEnergy = useCallback(async (id) => {
     try {
